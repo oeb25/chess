@@ -91,12 +91,12 @@ defmodule Chess.Game.State do
     min(b + 1, 7)..min(b + 8, 7)
     |> do_all_possible(a, :a)
   end
-  def all_possible(pos, dir), do: all_possible(Position.to_indices(pos), dir)
+  def all_possible(pos, dir), do: Position.to_indices(pos) |> all_possible(dir)
   def do_all_possible(positions, a, :a) do
-    positions |> Enum.map(fn(b) -> {a, b} |> Position.from_indices end)
+    for b <- positions, do: Position.from_indices({a, b})
   end
   def do_all_possible(positions, b, :b) do
-    positions |> Enum.map(fn(a) -> {a, b} |> Position.from_indices end)
+    for a <- positions, do: Position.from_indices({a, b})
   end
 
   def straight(pos) do
