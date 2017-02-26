@@ -30,7 +30,7 @@ defmodule Chess.GameController do
     game = Repo.get!(Game, id) |> Repo.preload(:moves)
     state = game
       |> Game.compute_current_state()
-      |> Game.State.move(:C1, :C3)
+      |> Game.State.move(:C1, :F3)
     render(conn, "show.html", game: game, state: state)
   end
 

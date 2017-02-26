@@ -17,12 +17,6 @@
       <% end %>
     </ol>
   </li>
-  <%=
-    @state
-    |> Chess.Game.State.valid_moves(:C3)
-    # |> Enum.map(&Chess.Move.Position.to_indices(&1) |> Tuple.to_list())
-    |> Poison.encode!
-  %>
   <div class="board">
     <%= for row <- @state.board do %>
       <div class="row">
@@ -34,6 +28,14 @@
     <% end %>
   </div>
 
+  <script>
+  var m = JSON.parse('<%=
+    m = @state
+    |> Chess.Game.State.valid_moves(:F3)
+    |> Poison.encode!
+    {:safe, m}
+  %>')
+  </script>
 </ul>
 
 <%= link "Edit", to: game_path(@conn, :edit, @game) %>

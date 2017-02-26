@@ -23,7 +23,7 @@ import "phoenix_html"
 window.chess = {
   toIndicies(i) {
     const [a, b] = i.split('')
-    return [8 - b, (parseInt(a, 16) - 10)]
+    return [8 - b, (parseInt(a, 32) - 10)]
   },
 
   select([r, c]) {
@@ -35,3 +35,5 @@ window.chess = {
     return i
   }
 }
+
+m.map(chess.highlight)

@@ -5,17 +5,14 @@ defmodule Chess.Game.State do
   alias Chess.{Game.Piece, Move.Position}
 
   def cast(%{board: board}) when is_list(board) do
-    board = board
-    |> Enum.map(fn(row) -> Enum.map(row, &(Piece.cast(&1))) end)
+    board = for row <- board do
+      for piece <- row, do: Piece.cast(piece)
+    end
 
     if board |> Enum.all?(fn(row) -> row |> Enum.all?(&(&1 != :error)) end) do
-      board =
-        board
-        |> Enum.map(fn(row) ->
-          Enum.map(row, fn(piece) ->
-            elem(piece, 1)
-          end)
-        end)
+      board = for row <- board do
+        for piece <- row, do: elem(piece, 1) 
+      end
 
       {:ok, %{board: board}}
     else
@@ -26,10 +23,11 @@ defmodule Chess.Game.State do
 
   def load(%{"board" => board}), do: load(%{board: board})
   def load(%{board: board}) when is_list(board) do
-    board =
-      board |> Enum.map(fn(row) -> row |> Enum.map(&(Piece.load(&1))) end)
-
-    if Enum.all?(board, fn(row) -> row |> Enum.all?(&(&1 != :error)) end) or true do
+    board = for row <- board do
+      for piece <- row, do: Piece.load(piece)
+    end
+    
+    if Enum.all?(board, fn(row) -> row |> Enum.all?(&(&1 != :error)) end) do
       board =
         board
         |> Enum.map(fn(row) ->
@@ -60,12 +58,10 @@ defmodule Chess.Game.State do
     {c, d} = to |> Position.to_indices
 
     board
-    |> List.update_at(c, fn(l) ->
-      l |> List.update_at(d, fn(_) ->
-        board |> Enum.at(a) |> Enum.at(b)
-      end)
-    end)
-    |> List.update_at(a, fn(l) -> l |> List.update_at(b, fn(_) -> :empty end) end)
+    |> Enum.flat_map(&(&1))
+    |> List.replace_at(c * 8 + d, board |> Enum.at(a) |> Enum.at(b))
+    |> List.replace_at(a * 8 + b, :empty)
+    |> Enum.chunk(8)
   end
 
   def piece_at(%{board: board}, pos), do: piece_at(board, pos)
@@ -104,37 +100,22 @@ defmodule Chess.Game.State do
   end
 
   def straight(pos) do
-    [:right, :left, :down, :up]
-    |> Enum.map(&all_possible(pos, &1))
+    for dir <- [:right, :left, :down, :up], do: all_possible(pos, dir)
   end
 
   def diagonal(pos) do
     {a, b} = pos |> Position.to_indices
 
-    left_down =
-      1..min(a, b)
-      |> Enum.map(&({a - &1, b - &1}))
+    left_down = for i <- 1..min(a, b), do: {a - i, b - i}
+    left_up = for i <- 1..min(a, 7 - b), do: {a - i, b + i}
+    right_down = for i <- 1..min(7 - a, b), do: {a + i, b - i}
+    right_up = for i <- 1..min(a, 7 - b), do: {a + i, b + i}
 
-    left_up =
-      1..min(a, 7 - b)
-      |> Enum.map(&({a - &1, b + &1}))
-
-    right_down =
-      1..min(7 - a, b)
-      |> Enum.map(&({a + &1, b - &1}))
-
-    right_up =
-      1..min(a, 7 - b)
-      |> Enum.map(&({a + &1, b + &1}))
-
-    [left_down, left_up, right_down, right_up]
-    |> Enum.map(fn(dir) ->
-      dir = dir
-      |> Enum.filter(fn({a, b}) -> a in 0..7 and b in 0..7 end)
-
-      dir
-      |> Enum.map(&Position.from_indices(&1))
-    end)
+    for dir <- [left_down, left_up, right_down, right_up] do
+      for {a, b} <- dir, a in 0..7 and b in 0..7 do
+        Position.from_indices({a, b})
+      end
+    end
   end
 
   defp check?(pos, board, :inbounds) do
@@ -177,10 +158,7 @@ defmodule Chess.Game.State do
   end
 
   defp only_if(positions, board, rule) do
-    positions
-    |> Enum.filter(fn(pos) ->
-      check?(pos, board, rule)
-    end)
+    for pos <- positions, check?(pos, board, rule), do: pos
   end
 
   def valid_moves(%{board: board}, [suit, :pawn], pos) do
@@ -239,19 +217,9 @@ defmodule Chess.Game.State do
   def valid_moves(%{board: board}, [suit, :king], pos) do
     {sa, sb} = pos |> Position.to_indices
 
-    -1..1
-    |> Enum.flat_map(fn(a) ->
-      -1..1
-      |> Enum.map(fn(b) ->
-        if a == 0 and b == 0 do
-          :skip
-        else
-          {sa + a, sb + b}
-        end
-      end)
-      |> Enum.filter(&(&1 != :skip))
-      |> Enum.map(&(Position.from_indices(&1)))
-    end)
+    for a <- -1..1, b <- -1..1, a != 0 or b != 0 do
+      Position.from_indices({sa + a, sb + b})
+    end
     |> only_if(board, {:not_suit, suit})
     |> only_if(board, {:direct_acces, pos})
   end
@@ -259,15 +227,11 @@ defmodule Chess.Game.State do
   def valid_moves(%{board: board}, [suit, :knight], pos) do
     {a, b} = Position.to_indices(pos)
 
-    [
+    spots = [
       {a + 1, b + 2}, {a + 1, b - 2}, {a - 1, b + 2}, {a - 1, b - 2},
       {a + 2, b + 1}, {a + 2, b - 1}, {a - 2, b + 1}, {a - 2, b - 1},
     ]
-    |> Enum.filter(fn(pos) ->
-      {a, b} = pos
-
-      a in 0..7 and b in 0..7
-    end)
+    for {a, b} <- spots, a in 0..7 and b in 0..7 do {a, b} end
     |> Enum.map(&Position.from_indices(&1))
     |> only_if(board, {:not_suit, suit})
   end
