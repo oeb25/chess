@@ -11,7 +11,7 @@
      start_permanent: Mix.env == :prod,
      aliases: aliases(),
      dialyzer: [plt_add_deps: :apps_direct, plt_add_apps: :wx],
-     deps: deps()],
+     deps: deps()]
   end
 
   # Configuration for the OTP application.
