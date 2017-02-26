@@ -19,3 +19,19 @@ import "phoenix_html"
 // paths "./socket" or full ones "web/static/js/socket".
 
 // import socket from "./socket"
+
+window.chess = {
+  toIndicies(i) {
+    const [a, b] = i.split('')
+    return [8 - b, (parseInt(a, 16) - 10)]
+  },
+
+  select([r, c]) {
+    return document.querySelector('.board').children[r].children[c]
+  },
+
+  highlight(i) {
+    chess.select(chess.toIndicies(i)).classList.add('highlight')
+    return i
+  }
+}

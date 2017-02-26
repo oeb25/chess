@@ -27,8 +27,11 @@ defmodule Chess.GameController do
   end
 
   def show(conn, %{"id" => id}) do
-    game = Repo.get!(Game, id)
-    render(conn, "show.html", game: game)
+    game = Repo.get!(Game, id) |> Repo.preload(:moves)
+    state = game
+      |> Game.compute_current_state()
+      |> Game.State.move(:C1, :C3)
+    render(conn, "show.html", game: game, state: state)
   end
 
   def edit(conn, %{"id" => id}) do

@@ -3,14 +3,36 @@
 <ul>
 
   <li>
-    <strong>Initial state:</strong>
-    <%= @game.initial_state |> Poison.encode! %>
-  </li>
-
-  <li>
     <strong>Type:</strong>
     <%= @game.game_type %>
   </li>
+
+  <li>
+    <strong>Moves:</strong>
+    <ol>
+      <%= for move <- @game.moves do %>
+        <li>
+          <%= "#{move.from} -> #{move.to}" %>
+        </li>
+      <% end %>
+    </ol>
+  </li>
+  <%=
+    @state
+    |> Chess.Game.State.valid_moves(:C3)
+    # |> Enum.map(&Chess.Move.Position.to_indices(&1) |> Tuple.to_list())
+    |> Poison.encode!
+  %>
+  <div class="board">
+    <%= for row <- @state.board do %>
+      <div class="row">
+      <%= for piece <- row do %>
+        <div class="piece <%= piece |> Chess.Game.Piece.format_class %>">
+        </div>
+      <% end %>
+      </div>
+    <% end %>
+  </div>
 
 </ul>
 

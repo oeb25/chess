@@ -6,7 +6,7 @@
     <%= if @user != nil do %>
       <%= @user.id %>
     <% else %>
-      Inge user fundet, sorry!
+      Inge user fundet!
     <% end %>
   </p>
 

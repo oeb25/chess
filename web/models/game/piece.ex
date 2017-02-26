@@ -42,4 +42,7 @@ defmodule Chess.Game.Piece do
     {:ok, list}
   end
   def dump(_), do: :error
+
+  def format_class(:empty), do: "empty"
+  def format_class([suit, piece]), do: "#{suit} #{piece}"
 end

@@ -51,15 +51,21 @@ defmodule Chess.Game.State do
   def dump(_), do: :error
 
   def move(%{board: board}, from, to) do
+    %{
+      board: board |> move(from, to)
+    }
+  end
+  def move(board, from, to) do
     {a, b} = from |> Position.to_indices
     {c, d} = to |> Position.to_indices
 
-    %{
-      board:
-        board
-        |> List.update_at(c, fn(l) -> l |> List.insert_at(d, board |> Enum.at(a) |> Enum.at(b)) end)
-        |> List.update_at(a, fn(l) -> l |> List.insert_at(b, :empty) end)
-    }
+    board
+    |> List.update_at(c, fn(l) ->
+      l |> List.update_at(d, fn(_) ->
+        board |> Enum.at(a) |> Enum.at(b)
+      end)
+    end)
+    |> List.update_at(a, fn(l) -> l |> List.update_at(b, fn(_) -> :empty end) end)
   end
 
   def piece_at(%{board: board}, pos), do: piece_at(board, pos)
@@ -73,7 +79,6 @@ defmodule Chess.Game.State do
     valid_moves(state, piece_at(board, pos), pos)
   end
 
-  # def all_possible(pos, da, db), do: all_possible(Position.to_indices(pos), da, db)
   def all_possible({a, b}, :right) do
     min(a + 1, 7)..min(a + 8, 7)
     |> do_all_possible(b, :b)

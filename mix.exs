@@ -1,4 +1,4 @@
- defmodule Chess.Mixfile do
+defmodule Chess.Mixfile do
   use Mix.Project
 
   def project do
@@ -10,7 +10,6 @@
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
      aliases: aliases(),
-     dialyzer: [plt_add_deps: :apps_direct, plt_add_apps: :wx],
      deps: deps()]
   end
 
@@ -20,7 +19,7 @@
   def application do
     [mod: {Chess, []},
      applications: [:phoenix, :phoenix_pubsub, :phoenix_html, :cowboy, :logger, :gettext,
-                    :phoenix_ecto, :postgrex, :ueberauth_identity]]
+                    :phoenix_ecto, :postgrex, :ueberauth_identity, :guardian]]
   end
 
   # Specifies which paths to compile per environment.
