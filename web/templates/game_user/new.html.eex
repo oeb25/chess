@@ -1,0 +1,6 @@
+<h2>New game user</h2>
+
+<%= render "form.html", changeset: @changeset,
+                        action: game_user_path(@conn, :create) %>
+
+<%= link "Back", to: game_user_path(@conn, :index) %>

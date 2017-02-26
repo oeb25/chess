@@ -1,0 +1,32 @@
+<div class="jumbotron">
+  <h2><%= gettext "Welcome to %{name}", name: "Kryds og bolle?" %></h2>
+  <p class="lead">A productive web framework that<br />does not compromise speed and maintainability.</p>
+</div>
+  <p>
+    <%= if @user != nil do %>
+      <%= @user.id %>
+    <% else %>
+      Inge user fundet, sorry!
+    <% end %>
+  </p>
+
+   <div class="game">
+    <div class="board">
+      <article>
+        <h1>Kryds og bolle - regler</h1>
+      <p>
+        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Laborum accusantium voluptatibus rem veniam sed ipsam, voluptatem beatae optio in quod voluptatum unde vitae? Ea ex et, amet, quas ipsam repellendus!
+      </p>
+      <div class="comment">
+        <h2>
+          kommentar titel
+        </h2>
+        <p>Godhejdav</p>
+        <p>
+          Hvor meget plads har jeg? Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ad similique nostrum dolores quia rerum nulla praesentium reiciendis eum dolorem necessitatibus veniam sit, nam vitae nisi eos ipsum, voluptas molestias temporibus? Lorem ipsum dolor sit amet, consectetur adipisicing elit. Officiis non qui repellat eum temporibus amet autem rem, sequi similique quas. Qui aperiam, accusantium dolores similique maxime quo perferendis. Debitis, repellendus.
+        </p>
+      </div>
+      </article>
+    </div>
+  </div>
+</div>

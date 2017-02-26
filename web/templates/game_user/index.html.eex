@@ -1,0 +1,28 @@
+<h2>Listing games users</h2>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>User</th>
+      <th>Game</th>
+
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+<%= for game_user <- @games_users do %>
+    <tr>
+      <td><%= game_user.user_id %></td>
+      <td><%= game_user.game_id %></td>
+
+      <td class="text-right">
+        <%= link "Show", to: game_user_path(@conn, :show, game_user), class: "btn btn-default btn-xs" %>
+        <%= link "Edit", to: game_user_path(@conn, :edit, game_user), class: "btn btn-default btn-xs" %>
+        <%= link "Delete", to: game_user_path(@conn, :delete, game_user), method: :delete, data: [confirm: "Are you sure?"], class: "btn btn-danger btn-xs" %>
+      </td>
+    </tr>
+<% end %>
+  </tbody>
+</table>
+
+<%= link "New game user", to: game_user_path(@conn, :new) %>

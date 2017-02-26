@@ -1,0 +1,31 @@
+version: '2'
+
+services:
+  db:
+    image: postgres
+    restart: always
+    environment:
+      - "POSTGRES_DB=phoenix_dev"
+      - "POSTGRES_USER=postgres"
+      - "POSTGRES_PASSWORD=postgres"
+    ports:
+      - 5432:5432
+    volumes:
+      - ./db:/var/lib/postgresql
+
+  web:
+    build: .
+    command: mix do local.hex --force, deps.get, phoenix.server
+    ports:
+      - 4000:4000
+    links:
+      - db
+    volumes:
+      - .:/code
+
+  floo:
+    image: oeb25/floobits
+    command: floomatic /code
+    volumes:
+      - .:/code
+      - $HOME/.floorc.json:/root/.floorc.json

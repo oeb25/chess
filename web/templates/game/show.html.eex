@@ -1,0 +1,18 @@
+<h2>Show game</h2>
+
+<ul>
+
+  <li>
+    <strong>Initial state:</strong>
+    <%= @game.initial_state |> Poison.encode! %>
+  </li>
+
+  <li>
+    <strong>Type:</strong>
+    <%= @game.game_type %>
+  </li>
+
+</ul>
+
+<%= link "Edit", to: game_path(@conn, :edit, @game) %>
+<%= link "Back", to: game_path(@conn, :index) %>
