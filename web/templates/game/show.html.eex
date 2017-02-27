@@ -1,7 +1,7 @@
 <h2>Show game</h2>
 
 <ul>
-
+<!--
   <li>
     <strong>Type:</strong>
     <%= @game.game_type %>
@@ -12,11 +12,12 @@
     <ol>
       <%= for move <- @game.moves do %>
         <li>
-          <%= "#{move.from} -> #{move.to}" %>
+          <%= "#{move.from |> Chess.Move.Position.to_nice_string} -> #{move.to |> Chess.Move.Position.to_nice_string}" %>
         </li>
       <% end %>
     </ol>
   </li>
+-->
   <div class="board">
     <%= for row <- @state.board do %>
       <div class="row">

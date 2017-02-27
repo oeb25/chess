@@ -102,7 +102,12 @@ defmodule Chess.GameStateTest do
   test "pond attack" do
     state = @valid_attrs |> move(:A7, :C3)
     assert piece_at(state, :C3) == [:black, :pawn]
-    assert valid_moves(state, :B2) |> to_atom == [:B3, :B4, :C3]
+    assert valid_moves(state, :D2) |> to_atom == [:D3, :D4, :C3]
+
+    assert piece_at(state, :C3) == [:black, :pawn]
+    state = state |> move(:C3, :E3)
+    assert piece_at(state, :E3) == [:black, :pawn]
+    assert valid_moves(state, :D2) |> to_atom == [:D3, :D4, :E3]
   end
 
   test "rook movement" do

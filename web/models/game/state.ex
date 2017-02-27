@@ -174,7 +174,7 @@ defmodule Chess.Game.State do
     |> only_if(board, {:direct_acces, pos})
 
     y =
-      [[r + 1, c + v], [r - 1, c + v]]
+      [[r - v, c + 1], [r - v, c - 1]]
       |> Enum.filter(fn([r, c]) -> r in 0..7 and c in 0..7 end)
       |> only_if(board, :not_empty)
       |> only_if(board, {:not_suit, suit})
