@@ -23,9 +23,6 @@ defmodule Chess.Game do
     |> validate_inclusion(:game_type, ["chess"])
   end
 
-  def white(piece), do: {:white, piece}
-  def black(piece), do: {:black, piece}
-
   def standard_chess_board, do: [
     [[:black, :rook], [:black, :knight], [:black, :bishop], [:black, :queen], [:black, :king], [:black, :bishop], [:black, :knight], [:black, :rook]],
     [[:black, :pawn], [:black, :pawn], [:black, :pawn], [:black, :pawn], [:black, :pawn], [:black, :pawn], [:black, :pawn], [:black, :pawn]],
