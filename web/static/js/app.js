@@ -34,7 +34,7 @@ window.chess = {
   },
 
   highlight(i) {
-    chess.find(chess.toIndicies(i)).classList.add('highlight')
+    chess.find(i).classList.add('highlight')
     return i
   },
 

@@ -38,7 +38,8 @@ defmodule Chess.GameStateTest do
 
   alias Chess.Game
   alias Chess.Game.State
-
+  import State, only: [valid_moves: 2, piece_at: 2, move: 3]
+  import Chess.Move.Position, only: [to_atom: 1]
   @valid_attrs %{
     board: Game.standard_chess_board,
   }
@@ -75,73 +76,73 @@ defmodule Chess.GameStateTest do
   test "move one piece" do
     state = @valid_attrs
 
-    assert State.piece_at(state, :B2) == [:white, :pawn]
-    assert State.piece_at(state, :B3) == :empty
-    state = state |> State.move(:B2, :B3)
-    assert State.piece_at(state, :B2) == :empty
-    assert State.piece_at(state, :B3) == [:white, :pawn]
+    assert piece_at(state, :B2) == [:white, :pawn]
+    assert piece_at(state, :B3) == :empty
+    state = state |> move(:B2, :B3)
+    assert piece_at(state, :B2) == :empty
+    assert piece_at(state, :B3) == [:white, :pawn]
   end
 
   test "valid moves for pawn at start" do
-    assert @valid_attrs |> State.valid_moves(:B2) == [:B3, :B4]
-    assert @valid_attrs |> State.valid_moves(:E7) == [:E6, :E5]
+    assert @valid_attrs |> valid_moves(:B2) |> to_atom == [:B3, :B4]
+    assert @valid_attrs |> valid_moves(:E7) |> to_atom == [:E6, :E5]
   end
 
   test "valid moves for pawn after move" do
-    assert @valid_attrs |> State.move(:B2, :B3) |> State.valid_moves(:B3) == [:B4]
-    assert @valid_attrs |> State.move(:F7, :F5) |> State.valid_moves(:F5) == [:F4]
+    assert @valid_attrs |> move(:B2, :B3) |> valid_moves(:B3) |> to_atom == [:B4]
+    assert @valid_attrs |> move(:F7, :F5) |> valid_moves(:F5) |> to_atom == [:F4]
   end
 
   test "invalidate move if target position taken" do
-    state = @valid_attrs |> State.move(:A1, :A3)
-    assert state |> State.piece_at(:A4) == :empty
-    assert state |> State.valid_moves(:A2) == []
+    state = @valid_attrs |> move(:A1, :A3)
+    assert state |> piece_at(:A4) == :empty
+    assert state |> valid_moves(:A2) == []
   end
 
   test "pond attack" do
-    state = @valid_attrs |> State.move(:A7, :C3)
-    assert State.piece_at(state, :C3) == [:black, :pawn]
-    assert State.valid_moves(state, :B2) == [:B3, :B4, :C3]
+    state = @valid_attrs |> move(:A7, :C3)
+    assert piece_at(state, :C3) == [:black, :pawn]
+    assert valid_moves(state, :B2) |> to_atom == [:B3, :B4, :C3]
   end
 
   test "rook movement" do
-    state = @valid_attrs |> State.move(:A1, :B4)
-    assert State.piece_at(state, :B4) == [:white, :rook]
-    assert State.valid_moves(state, :B4) == [:B3, :B5, :B6, :B7, :C4, :D4, :E4, :F4, :G4, :H4, :A4]
+    state = @valid_attrs |> move(:A1, :B4)
+    assert piece_at(state, :B4) == [:white, :rook]
+    assert valid_moves(state, :B4) |> to_atom == [:B3, :B5, :B6, :B7, :C4, :D4, :E4, :F4, :G4, :H4, :A4]
 
-    state = state |> State.move(:B7, :G4)
-    assert State.piece_at(state, :G4) == [:black, :pawn]
-    assert State.valid_moves(state, :B4) == [:B3, :B5, :B6, :B7, :B8, :C4, :D4, :E4, :F4, :G4, :A4]
+    state = state |> move(:B7, :G4)
+    assert piece_at(state, :G4) == [:black, :pawn]
+    assert valid_moves(state, :B4) |> to_atom == [:B3, :B5, :B6, :B7, :B8, :C4, :D4, :E4, :F4, :G4, :A4]
   end
 
   test "knight movement" do
-    state = @valid_attrs |> State.move(:B1, :C4)
-    assert State.piece_at(state, :C4) == [:white, :knight]
-    assert state |> State.valid_moves(:C4) == [:E3, :A3, :E5, :A5, :D6, :B6]
+    state = @valid_attrs |> move(:B1, :C4)
+    assert piece_at(state, :C4) == [:white, :knight]
+    assert state |> valid_moves(:C4) |> to_atom == [:E3, :A3, :E5, :A5, :D6, :B6]
   end
 
   test "bishop movement" do
-    state = @valid_attrs |> State.move(:C1, :C4)
-    assert State.piece_at(state, :C4) == [:white, :bishop]
-    assert state |> State.valid_moves(:C4) == [:B5, :A6, :D5, :E6, :F7, :B3, :D3]
+    state = @valid_attrs |> move(:C1, :C4)
+    assert piece_at(state, :C4) == [:white, :bishop]
+    assert state |> valid_moves(:C4) |> to_atom == [:B5, :A6, :D5, :E6, :F7, :B3, :D3]
   end
 
   test "king movement" do
-    state = @valid_attrs |> State.move(:D1, :C3) |> State.move(:H2, :D4)
-    assert State.piece_at(state, :C3) == [:white, :king]
-    assert state |> State.valid_moves(:C3)
+    state = @valid_attrs |> move(:D1, :C3) |> move(:H2, :D4)
+    assert piece_at(state, :C3) == [:white, :king]
+    assert state |> valid_moves(:C3) |> to_atom
       == [:B4, :C4, :B3, :D3]
   end
 
   test "queen movement" do
-    state = @valid_attrs |> State.move(:E1, :C4)
-    assert State.piece_at(state, :C4) == [:white, :queen]
-    assert state |> State.valid_moves(:C4)
+    state = @valid_attrs |> move(:E1, :C4)
+    assert piece_at(state, :C4) == [:white, :queen]
+    assert state |> valid_moves(:C4) |> to_atom
       == [:B5, :A6, :D5, :E6, :F7, :B3, :D3, :C3, :C5, :C6, :C7, :D4, :E4, :F4, :G4, :H4, :B4, :A4]
   end
 
   test "no moves for empty position" do
-    assert @valid_attrs |> State.valid_moves(:D4) == []
+    assert @valid_attrs |> valid_moves(:D4) == []
   end
 end
 

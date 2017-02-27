@@ -3,8 +3,8 @@ defmodule Chess.Repo.Migrations.CreateMove do
 
   def change do
     create table(:moves) do
-      add :from, :string
-      add :to, :string
+      add :from, :integer
+      add :to, :integer
       add :user_id, references(:users, on_delete: :nothing, type: :uuid)
       add :game_id, references(:games, on_delete: :nothing)
 

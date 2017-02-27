@@ -33,7 +33,7 @@ defmodule Chess.GameController do
       |> Game.State.move(:C1, :F3)
       |> Game.State.move(:F8, :E6)
       |> Game.State.move(:C7, :C3)
-    select = Chess.Move.Position.load!(select)
+    select = Chess.Move.Position.to_indices(select)
     render(conn, "show.html", game: game, select: select, state: state)
   end
 
