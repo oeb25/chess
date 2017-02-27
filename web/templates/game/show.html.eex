@@ -21,8 +21,8 @@
     <%= for row <- @state.board do %>
       <div class="row">
       <%= for piece <- row do %>
-        <div class="piece <%= piece |> Chess.Game.Piece.format_class %>">
-        </div>
+        <a class="piece <%= piece |> Chess.Game.Piece.format_class %>">
+        </a>
       <% end %>
       </div>
     <% end %>
@@ -31,7 +31,7 @@
   <script>
   var m = JSON.parse('<%=
     m = @state
-    |> Chess.Game.State.valid_moves(:F3)
+    |> Chess.Game.State.valid_moves(@select)
     |> Poison.encode!
     {:safe, m}
   %>')

@@ -25,15 +25,28 @@ window.chess = {
     const [a, b] = i.split('')
     return [8 - b, (parseInt(a, 32) - 10)]
   },
+  fromIndices([b, a]) {
+      return (a + 10).toString(32) + '' + (8 - b)
+  },
 
-  select([r, c]) {
+  find([r, c]) {
     return document.querySelector('.board').children[r].children[c]
   },
 
   highlight(i) {
-    chess.select(chess.toIndicies(i)).classList.add('highlight')
+    chess.find(chess.toIndicies(i)).classList.add('highlight')
     return i
-  }
+  },
+
+  bindClick() {
+    for (let r = 0; r < 8; r++) {
+        for (let c = 0; c < 8; c++) {
+            const i = chess.fromIndices([r, c])
+            chess.find([r, c]).href = window.location.pathname + '?select=' + i
+        }
+    }
+  },
 }
 
 m.map(chess.highlight)
+chess.bindClick()

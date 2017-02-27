@@ -108,8 +108,8 @@ defmodule Chess.Game.State do
 
     left_down = for i <- 1..min(a, b), do: {a - i, b - i}
     left_up = for i <- 1..min(a, 7 - b), do: {a - i, b + i}
-    right_down = for i <- 1..min(7 - a, b), do: {a + i, b - i}
-    right_up = for i <- 1..min(a, 7 - b), do: {a + i, b + i}
+    right_down = for i <- 1..max(7 - a, b), do: {a + i, b - i}
+    right_up = for i <- 1..max(a, 7 - b), do: {a + i, b + i}
 
     for dir <- [left_down, left_up, right_down, right_up] do
       for {a, b} <- dir, a in 0..7 and b in 0..7 do
@@ -217,7 +217,7 @@ defmodule Chess.Game.State do
   def valid_moves(%{board: board}, [suit, :king], pos) do
     {sa, sb} = pos |> Position.to_indices
 
-    for a <- -1..1, b <- -1..1, a != 0 or b != 0 do
+    for a <- -1..1, b <- -1..1, (a != 0 or b != 0) and (sa + a) in 0..7 and (sb + b) in 0..7 do
       Position.from_indices({sa + a, sb + b})
     end
     |> only_if(board, {:not_suit, suit})
