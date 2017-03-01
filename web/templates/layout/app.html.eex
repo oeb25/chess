@@ -31,6 +31,7 @@
 
     </div> <!-- /container -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/turbolinks/5.0.0/turbolinks.min.js"></script>
+    <script>window.userToken = "<%= assigns[:user_token] %>";</script>
     <script src="<%= static_path(@conn, "/js/app.js") %>"></script>
   </body>
 </html>

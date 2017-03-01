@@ -12,7 +12,7 @@ defmodule Chess.Game.State do
 
     if board |> Enum.all?(fn(row) -> row |> Enum.all?(&(&1 != :error)) end) do
       board = for row <- board do
-        for piece <- row, do: elem(piece, 1) 
+        for piece <- row, do: elem(piece, 1)
       end
 
       {:ok, %{board: board}}
@@ -27,15 +27,11 @@ defmodule Chess.Game.State do
     board = for row <- board do
       for piece <- row, do: Piece.load(piece)
     end
-    
+
     if Enum.all?(board, fn(row) -> row |> Enum.all?(&(&1 != :error)) end) do
-      board =
-        board
-        |> Enum.map(fn(row) ->
-          Enum.map(row, fn(piece) ->
-            elem(piece, 1)
-          end)
-        end)
+      board = for row <- board do
+        for piece <- row, do: elem(piece, 1)
+      end
 
       {:ok, %{board: board}}
     else
@@ -70,42 +66,24 @@ defmodule Chess.Game.State do
   end
   def piece_at(board, pos) when is_atom(pos), do: piece_at(board, to_indices(pos))
 
-  def valid_moves(%{board: board} = state, pos) when is_atom(pos) do
+  def valid_moves(%{board: board} = state, pos) when is_atom(pos) or is_binary(pos) do
     valid_moves(state, to_indices(pos))
-  end 
+  end
   def valid_moves(%{board: board} = state, pos) do
     valid_moves(state, piece_at(board, pos), pos)
   end
 
-  def all_possible([a, b], :right) do
-    min(a + 1, 7)..min(a + 8, 7)
-    |> do_all_possible(b, :b)
-  end
-  def all_possible([a, b], :left) do
-    max(a - 1, 0)..max(a - 8, 0)
-    |> do_all_possible(b, :b)
-  end
-  def all_possible([a, b], :up) do
-    max(b - 1, 0)..max(b - 8, 0)
-    |> do_all_possible(a, :a)
-  end
-  def all_possible([a, b], :down) do
-    min(b + 1, 7)..min(b + 8, 7)
-    |> do_all_possible(a, :a)
-  end
-  def all_possible(pos, dir), do: pos |> all_possible(dir)
-  def do_all_possible(positions, a, :a) do
-    for b <- positions, do: [a, b]
-  end
-  def do_all_possible(positions, b, :b) do
-    for a <- positions, do: [a, b]
-  end
+  def straight([a, b]) when is_integer(a) and is_integer(b) do
+    right = for a <- min(a + 1, 7)..min(a + 8, 7), do: [a, b]
+    left = for a <- max(a - 1, 0)..max(a - 8, 0), do: [a, b]
+    up = for b <- max(b - 1, 0)..max(b - 8, 0), do: [a, b]
+    down = for b <- min(b + 1, 7)..min(b + 8, 7), do: [a, b]
 
-  def straight(pos) do
-    for dir <- [:right, :left, :down, :up], do: all_possible(pos, dir)
+    [right, left, down, up]
   end
+  def straight(pos), do: pos |> to_indices |> straight
 
-  def diagonal([a, b]) do
+  def diagonal([a, b]) when is_integer(a) and is_integer(b) do
     left_down = for i <- 1..min(a, b), do: [a - i, b - i]
     left_up = for i <- 1..min(a, 7 - b), do: [a - i, b + i]
     right_down = for i <- 1..max(7 - a, b), do: [a + i, b - i]
@@ -117,14 +95,15 @@ defmodule Chess.Game.State do
       end
     end
   end
+  def diagonal(pos), do: pos |> to_indices |> diagonal
 
-  defp check?(pos, board, :empty) do
+  def check?(pos, board, :empty) do
     piece_at(board, pos) == :empty
   end
-  defp check?(pos, board, :not_empty) do
+  def check?(pos, board, :not_empty) do
     piece_at(board, pos) != :empty
   end
-  defp check?(pos, board, {:not_suit, suit}) do
+  def check?(pos, board, {:not_suit, suit}) do
     case piece_at(board, pos) do
       [s, _] when s == suit ->
         false
@@ -132,7 +111,7 @@ defmodule Chess.Game.State do
         true
     end
   end
-  defp check?(pos, board, {:direct_acces, start}) do
+  def check?(pos, board, {:direct_acces, start}) do
     possible_straight = start |> straight
     possible_diagonal = start |> diagonal
 
@@ -152,7 +131,7 @@ defmodule Chess.Game.State do
     pos in possible
   end
 
-  defp only_if(positions, board, rule) do
+  def only_if(positions, board, rule) do
     for pos <- positions, check?(pos, board, rule), do: pos
   end
 

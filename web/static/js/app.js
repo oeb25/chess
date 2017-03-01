@@ -18,9 +18,13 @@ import "phoenix_html"
 // Local files can be imported directly using relative
 // paths "./socket" or full ones "web/static/js/socket".
 
-// import socket from "./socket"
+import {channel} from "./socket"
 
 window.chess = {
+  state: {
+    selected: false
+  },
+
   toIndicies(i) {
     const [a, b] = i.split('')
     return [8 - b, (parseInt(a, 32) - 10)]
@@ -33,20 +37,58 @@ window.chess = {
     return document.querySelector('.board').children[r].children[c]
   },
 
+  move(from, to) {
+    chess.find(to).className = chess.find(from).className
+    chess.find(from).className = 'piece empty'
+  },
+
+  removeHighlights() {
+    for (let el of document.querySelectorAll('.board .highlight')) {
+      console.log(el)
+      el.classList.remove('highlight')
+    }
+  },
   highlight(i) {
     chess.find(i).classList.add('highlight')
     return i
   },
 
+  click(e, pos) {
+    // if (chess.state.selected && chess.state.selected[0] == pos[0] && chess.state.selected[1] == pos[1]) {
+    //   chess.state.selected = false
+    //   chess.removeHighlights()
+    // } else
+    if (chess.state.selected && e.classList.contains('highlight')) {
+      channel.push('move', {from: chess.state.selected, to: pos})
+    } else {
+      channel.push('select', pos)
+        .receive("ok", ({ moves }) => {
+          chess.state.selected = pos
+          chess.removeHighlights()
+          moves.map(chess.highlight)
+        })
+        .receive("error", e => console.log('error', e))
+        .receive("timeout", e => console.log('timeout', e))
+    }
+  },
+
   bindClick() {
     for (let r = 0; r < 8; r++) {
-        for (let c = 0; c < 8; c++) {
-            const i = chess.fromIndices([r, c])
-            chess.find([r, c]).href = window.location.pathname + '?select=' + i
-        }
+      for (let c = 0; c < 8; c++) {
+        const pos = [r, c]
+        const elem = chess.find(pos)
+        elem.onclick = () => chess.click(elem, pos)
+      }
     }
   },
 }
 
-m.map(chess.highlight)
+// m.map(chess.highlight)
 chess.bindClick()
+
+channel
+  .on("move", ({from, to}) => {
+    chess.state.selected = false
+    chess.removeHighlights()
+    chess.move(from, to)
+  })

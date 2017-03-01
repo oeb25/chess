@@ -38,11 +38,12 @@ defmodule Chess.GameStateTest do
 
   alias Chess.Game
   alias Chess.Game.State
-  import State, only: [valid_moves: 2, piece_at: 2, move: 3]
+  import State, only: [valid_moves: 2, piece_at: 2, move: 3, check?: 3]
   import Chess.Move.Position, only: [to_atom: 1]
   @valid_attrs %{
     board: Game.standard_chess_board,
   }
+  @board @valid_attrs.board
 
   test "casting valid board" do
     state = State.cast(@valid_attrs)
@@ -73,6 +74,14 @@ defmodule Chess.GameStateTest do
       == loaded
   end
 
+  test "check empty" do
+    assert check?(:B3, @board, :empty)
+  end
+
+  test "check not empty" do
+    assert check?(:B3, @board, :not_empty)
+  end
+
   test "move one piece" do
     state = @valid_attrs
 
@@ -84,7 +93,7 @@ defmodule Chess.GameStateTest do
   end
 
   test "valid moves for pawn at start" do
-    assert @valid_attrs |> valid_moves(:B2) |> to_atom == [:B3, :B4]
+    assert @valid_attrs |> valid_moves(:B2) |> to_atom == [:B3, :B4, :A3]
     assert @valid_attrs |> valid_moves(:E7) |> to_atom == [:E6, :E5]
   end
 

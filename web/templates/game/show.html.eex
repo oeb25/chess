@@ -1,43 +1,14 @@
 <h2>Show game</h2>
 
-<ul>
-<!--
-  <li>
-    <strong>Type:</strong>
-    <%= @game.game_type %>
-  </li>
-
-  <li>
-    <strong>Moves:</strong>
-    <ol>
-      <%= for move <- @game.moves do %>
-        <li>
-          <%= "#{move.from |> Chess.Move.Position.to_nice_string} -> #{move.to |> Chess.Move.Position.to_nice_string}" %>
-        </li>
-      <% end %>
-    </ol>
-  </li>
--->
-  <div class="board">
-    <%= for row <- @state.board do %>
-      <div class="row">
+<div class="board">
+  <%= for row <- @state.board do %>
+    <div class="row">
       <%= for piece <- row do %>
-        <a class="piece <%= piece |> Chess.Game.Piece.format_class %>">
-        </a>
+        <a class="piece <%= piece |> Chess.Game.Piece.format_class %>"></a>
       <% end %>
-      </div>
-    <% end %>
-  </div>
-
-  <script>
-  var m = JSON.parse('<%=
-    m = @state
-    |> Chess.Game.State.valid_moves(@select)
-    |> Poison.encode!
-    {:safe, m}
-  %>')
-  </script>
-</ul>
+    </div>
+  <% end %>
+</div>
 
 <%= link "Edit", to: game_path(@conn, :edit, @game) %>
 <%= link "Back", to: game_path(@conn, :index) %>

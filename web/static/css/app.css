@@ -25,10 +25,10 @@ h1 {
 .row {
     display: flex;
 }
-.row:nth-child(odd) .piece:nth-child(odd) {
+.row:nth-child(odd) .piece:nth-child(even) {
     background-color: #8a6d3b;
 }
-.row:nth-child(even) .piece:nth-child(even) {
+.row:nth-child(even) .piece:nth-child(odd) {
     background-color: #8a6d3b;
 }
 

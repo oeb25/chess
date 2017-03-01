@@ -2,7 +2,7 @@ defmodule Chess.Move.Position do
   @behaviour Ecto.Type
   def type, do: :integer
 
-  @legal_positions 0..16 
+  @legal_positions 0..16
 
   def legal_position?(pos) do
     pos in @legal_positions
@@ -56,7 +56,12 @@ defmodule Chess.Move.Position do
   end
   def cast(_), do: :error
 
-  def cast!(a), do: elem(cast(a), 1)
+  def cast!(a) do
+    case cast(a) do
+      {:ok, h} -> h
+      :error   -> raise "Could not cast position"
+    end
+  end
 
   def load(pos) when is_integer(pos) do
     use Bitwise

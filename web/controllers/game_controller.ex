@@ -26,15 +26,11 @@ defmodule Chess.GameController do
     end
   end
 
-  def show(conn, %{"id" => id, "select" => select}) do
+  def show(conn, %{"id" => id}) do
     game = Repo.get!(Game, id) |> Repo.preload(:moves)
     state = game
       |> Game.compute_current_state()
-      |> Game.State.move(:C1, :F3)
-      |> Game.State.move(:F8, :E6)
-      |> Game.State.move(:C7, :C3)
-    select = Chess.Move.Position.to_indices(select)
-    render(conn, "show.html", game: game, select: select, state: state)
+    render(conn, "show.html", game: game, state: state)
   end
 
   def edit(conn, %{"id" => id, "select" => select}) do
