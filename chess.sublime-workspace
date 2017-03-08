@@ -1,0 +1,1228 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"has",
+				"hashed_password"
+			],
+			[
+				"ha",
+				"hashed_password"
+			],
+			[
+				"cliet",
+				"client_id"
+			],
+			[
+				"cli",
+				"client_id"
+			],
+			[
+				"ta",
+				"ta-l\ttext-align: left;"
+			],
+			[
+				"sp",
+				"space-around"
+			],
+			[
+				"lists",
+				"list-style"
+			],
+			[
+				"space",
+				"space-between"
+			],
+			[
+				"flex",
+				"flex-direction"
+			],
+			[
+				"remove",
+				"removeHighlights"
+			],
+			[
+				"sele",
+				"selected"
+			],
+			[
+				"vali",
+				"valid_attrs"
+			],
+			[
+				"revm",
+				"removeHighlights"
+			],
+			[
+				"config",
+				"config_file"
+			],
+			[
+				"prin",
+				"println\tprintln!(…)"
+			],
+			[
+				"batma",
+				"batman_client"
+			],
+			[
+				"pos",
+				"posToWorldSpace\tmethod"
+			],
+			[
+				"w",
+				"posToWorldSpace\tmethod"
+			],
+			[
+				"Int",
+				"Intro\tclass"
+			],
+			[
+				"Rec",
+				"Rect\tclass"
+			],
+			[
+				"texta",
+				"text-align"
+			],
+			[
+				"inline",
+				"inline-block"
+			],
+			[
+				"on",
+				"onInput"
+			]
+		]
+	},
+	"buffers":
+	[
+		{
+			"file": "lib/chess/web/router.ex",
+			"settings":
+			{
+				"buffer_size": 517,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "priv/repo/migrations/20170308090545_create_users_user.exs",
+			"settings":
+			{
+				"buffer_size": 298,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "lib/chess/users/user.ex",
+			"settings":
+			{
+				"buffer_size": 236,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "lib/chess/users/users.ex",
+			"settings":
+			{
+				"buffer_size": 2153,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"contents": "defmodule Chess.UsersTest do\n  use Chess.DataCase\n\n  alias Chess.Users\n  alias Chess.Users.User\n\n  import Comeonin.Bcrypt\n\n  @create_attrs %{email: \"some email\", password: \"some password\", name: \"some name\"}\n  @update_attrs %{email: \"some updated email\", password: \"some updated password\", name: \"some updated name\"}\n  @invalid_attrs %{email: nil, name: nil}\n\n  def fixture(:user, attrs \\\\ @create_attrs) do\n    {:ok, user} = Users.create_user(attrs)\n    user\n  end\n\n  defp remove_pw(user), do: user |> Map.put(:password, nil)\n\n  test \"list_users/1 returns all users\" do\n    user = fixture(:user)\n    assert Users.list_users() == [user |> remove_pw]\n  end\n\n  test \"get_user! returns the user with given id\" do\n    user = fixture(:user)\n    assert Users.get_user!(user.id) == user |> remove_pw\n  end\n\n  test \"create_user/1 with valid data creates a user\" do\n    assert {:ok, %User{} = user} = Users.create_user(@create_attrs)\n    \n    assert user.email == \"some email\"\n    assert checkpw(\"some password\", user.hashed_password)\n    assert user.name == \"some name\"\n  end\n\n  test \"create_user/1 with invalid data returns error changeset\" do\n    assert {:error, %Ecto.Changeset{}} = Users.create_user(@invalid_attrs)\n  end\n\n  test \"update_user/2 with valid data updates the user\" do\n    user = fixture(:user)\n    assert {:ok, user} = Users.update_user(user, @update_attrs)\n    assert %User{} = user\n    \n    assert user.email == \"some updated email\"\n    assert checkpw(\"some updated password\", user.hashed_password)\n    assert user.name == \"some updated name\"\n  end\n\n  test \"update_user/2 with invalid data returns error changeset\" do\n    user = fixture(:user)\n    assert {:error, %Ecto.Changeset{}} = Users.update_user(user, @invalid_attrs)\n    assert user |> Map.put(:password, nil) == Users.get_user!(user.id)\n  end\n\n  test \"delete_user/1 deletes the user\" do\n    user = fixture(:user)\n    assert {:ok, %User{}} = Users.delete_user(user)\n    assert_raise Ecto.NoResultsError, fn -> Users.get_user!(user.id) end\n  end\n\n  test \"change_user/1 returns a user changeset\" do\n    user = fixture(:user)\n    assert %Ecto.Changeset{} = Users.change_user(user)\n  end\nend\n",
+			"file": "test/users_test.exs",
+			"file_size": 2158,
+			"file_write_time": 131334432330000000,
+			"settings":
+			{
+				"buffer_size": 2158,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"contents": "defmodule Chess.Web.UserControllerTest do\n  use Chess.Web.ConnCase\n\n  alias Chess.Users\n\n  @create_attrs %{email: \"some email\", password: \"some password\", name: \"some name\"}\n  @update_attrs %{email: \"some updated email\", password: \"some updated password\", name: \"some updated name\"}\n  @invalid_attrs %{email: nil, password: nil, name: nil}\n\n  def fixture(:user) do\n    {:ok, user} = Users.create_user(@create_attrs)\n    user\n  end\n\n  test \"lists all entries on index\", %{conn: conn} do\n    conn = get conn, user_path(conn, :index)\n    assert html_response(conn, 200) =~ \"Listing Users\"\n  end\n\n  test \"renders form for new users\", %{conn: conn} do\n    conn = get conn, user_path(conn, :new)\n    assert html_response(conn, 200) =~ \"New User\"\n  end\n\n  test \"creates user and redirects to show when data is valid\", %{conn: conn} do\n    conn = post conn, user_path(conn, :create), user: @create_attrs\n\n    assert %{id: id} = redirected_params(conn)\n    assert redirected_to(conn) == user_path(conn, :show, id)\n\n    conn = get conn, user_path(conn, :show, id)\n    assert html_response(conn, 200) =~ \"Show User\"\n  end\n\n  test \"does not create user and renders errors when data is invalid\", %{conn: conn} do\n    conn = post conn, user_path(conn, :create), user: @invalid_attrs\n    assert html_response(conn, 200) =~ \"New User\"\n  end\n\n  test \"renders form for editing chosen user\", %{conn: conn} do\n    user = fixture(:user)\n    conn = get conn, user_path(conn, :edit, user)\n    assert html_response(conn, 200) =~ \"Edit User\"\n  end\n\n  test \"updates chosen user and redirects when data is valid\", %{conn: conn} do\n    user = fixture(:user)\n    conn = put conn, user_path(conn, :update, user), user: @update_attrs\n    assert redirected_to(conn) == user_path(conn, :show, user)\n\n    conn = get conn, user_path(conn, :show, user)\n    assert html_response(conn, 200) =~ \"some updated email\"\n  end\n\n  test \"does not update chosen user and renders errors when data is invalid\", %{conn: conn} do\n    user = fixture(:user)\n    conn = put conn, user_path(conn, :update, user), user: @invalid_attrs\n    assert html_response(conn, 200) =~ \"Edit User\"\n  end\n\n  test \"deletes chosen user\", %{conn: conn} do\n    user = fixture(:user)\n    conn = delete conn, user_path(conn, :delete, user)\n    assert redirected_to(conn) == user_path(conn, :index)\n    assert_error_sent 404, fn ->\n      get conn, user_path(conn, :show, user)\n    end\n  end\nend\n",
+			"file": "test/web/controllers/user_controller_test.exs",
+			"file_size": 2419,
+			"file_write_time": 131334432710000000,
+			"settings":
+			{
+				"buffer_size": 2419,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"contents": "defmodule Chess.Web.UserController do\n  use Chess.Web, :controller\n\n  alias Chess.Users\n\n  def index(conn, _params) do\n    users = Users.list_users()\n    render(conn, \"index.html\", users: users)\n  end\n\n  def new(conn, _params) do\n    changeset = Users.change_user(%Chess.Users.User{})\n    render(conn, \"new.html\", changeset: changeset)\n  end\n\n  def create(conn, %{\"user\" => user_params}) do\n    case Users.create_user(user_params) do\n      {:ok, user} ->\n        conn\n        |> put_flash(:info, \"User created successfully.\")\n        |> redirect(to: user_path(conn, :show, user))\n      {:error, %Ecto.Changeset{} = changeset} ->\n        render(conn, \"new.html\", changeset: changeset)\n    end\n  end\n\n  def show(conn, %{\"id\" => id}) do\n    user = Users.get_user!(id)\n    render(conn, \"show.html\", user: user)\n  end\n\n  def edit(conn, %{\"id\" => id}) do\n    user = Users.get_user!(id)\n    changeset = Users.change_user(user)\n    render(conn, \"edit.html\", user: user, changeset: changeset)\n  end\n\n  def update(conn, %{\"id\" => id, \"user\" => user_params}) do\n    user = Users.get_user!(id)\n\n    case Users.update_user(user, user_params) do\n      {:ok, user} ->\n        conn\n        |> put_flash(:info, \"User updated successfully.\")\n        |> redirect(to: user_path(conn, :show, user))\n      {:error, %Ecto.Changeset{} = changeset} ->\n        render(conn, \"edit.html\", user: user, changeset: changeset)\n    end\n  end\n\n  def delete(conn, %{\"id\" => id}) do\n    user = Users.get_user!(id)\n    {:ok, _user} = Users.delete_user(user)\n\n    conn\n    |> put_flash(:info, \"User deleted successfully.\")\n    |> redirect(to: user_path(conn, :index))\n  end\nend\n",
+			"file": "lib/chess/web/controllers/user_controller.ex",
+			"file_size": 1640,
+			"file_write_time": 131334375450000000,
+			"settings":
+			{
+				"buffer_size": 1640,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "mix.exs",
+			"settings":
+			{
+				"buffer_size": 1540,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"contents": "{\n\t\"folders\":\n\t[\n\t\t{\n\t\t\t\"folder_exclude_patterns\":\n\t\t\t[\n\t\t\t\t\"_build\",\n\t\t\t\t\"deps\",\n\t\t\t\t\"assets/node_modules\",\n\t\t\t\t\"priv/static\"\n\t\t\t],\n\t\t\t\"path\": \".\"\n\t\t}\n\t]\n}\n",
+			"file": "chess.sublime-project",
+			"file_size": 157,
+			"file_write_time": 131334376980000000,
+			"settings":
+			{
+				"buffer_size": 157,
+				"line_ending": "Unix"
+			}
+		}
+	],
+	"build_system": "",
+	"build_system_choices":
+	[
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 131.0,
+		"last_filter": "ssexlir",
+		"selected_items":
+		[
+			[
+				"ssexlir",
+				"Set Syntax: Elixir"
+			],
+			[
+				"sshtml",
+				"Set Syntax: HTML"
+			],
+			[
+				"editor",
+				"Snippet: editorconfig"
+			],
+			[
+				"floob",
+				"Floobits - Join Workspace"
+			],
+			[
+				"minim",
+				"View: Toggle Minimap"
+			],
+			[
+				"remove",
+				"Package Control: Remove Package"
+			],
+			[
+				"remve",
+				"Package Control: Remove Channel"
+			],
+			[
+				"rsync",
+				"rsync ssh: Initialize settings"
+			],
+			[
+				"isntallpa",
+				"Package Control: Install Package"
+			],
+			[
+				"install",
+				"Package Control: Install Package"
+			],
+			[
+				"rsy",
+				"rsync ssh: Initialize settings"
+			],
+			[
+				"intia",
+				"rsync ssh: Initialize settings"
+			],
+			[
+				"project",
+				"Project: Save As"
+			],
+			[
+				"settings",
+				"rsync ssh: Initialize settings"
+			],
+			[
+				"sftp",
+				"SFTP: Sync Both Directions…"
+			],
+			[
+				"sftpsy",
+				"SFTP: Sync Remote -> Local…"
+			],
+			[
+				"bro",
+				"SFTP: Browse Server…"
+			],
+			[
+				"edit",
+				"SFTP: Edit Remote Mapping…"
+			],
+			[
+				"upload",
+				"SFTP: Upload File"
+			],
+			[
+				"b",
+				"SFTP: Browse Remote…"
+			],
+			[
+				"brow",
+				"SFTP: Browse Server…"
+			],
+			[
+				"sf",
+				"SFTP: Browse Server…"
+			],
+			[
+				"setups",
+				"SFTP: Setup Server…"
+			],
+			[
+				"join",
+				"Floobits - Join Workspace"
+			],
+			[
+				"ssbash",
+				"Set Syntax: Shell Script (Bash)"
+			],
+			[
+				"floobits",
+				"Floobits - Refresh Workspace"
+			],
+			[
+				"preveiw",
+				"Markdown Preview: Preview in Browser"
+			],
+			[
+				"ssrust",
+				"Set Syntax: Rust"
+			],
+			[
+				"preview",
+				"Markdown Preview: Preview in Browser"
+			],
+			[
+				"prvie",
+				"Markdown Preview: Preview in Browser"
+			],
+			[
+				"ssmarkd",
+				"Set Syntax: MultiMarkdown"
+			],
+			[
+				"ssmark",
+				"Set Syntax: Markdown"
+			],
+			[
+				"scher",
+				"Schemr: List all schemes"
+			],
+			[
+				"insta",
+				"Package Control: Install Package"
+			],
+			[
+				"setting",
+				"Preferences: Settings"
+			],
+			[
+				"themr",
+				"Themr: List themes"
+			],
+			[
+				"sssql",
+				"Set Syntax: SQL"
+			],
+			[
+				"pr",
+				"Markdown Preview: Preview in Browser"
+			],
+			[
+				"prev",
+				"Markdown Preview: Preview in Browser"
+			],
+			[
+				"pre",
+				"Markdown Preview: Preview in Browser"
+			],
+			[
+				"dic",
+				"Dictionaries: Set Language"
+			],
+			[
+				"markdown",
+				"Markdown Preview: Preview in Browser"
+			],
+			[
+				"ssamrkd",
+				"Set Syntax: Markdown"
+			],
+			[
+				"package",
+				"Preferences: Browse Packages"
+			],
+			[
+				"elm build",
+				"Elm Build System: Open in Browser"
+			]
+		],
+		"width": 457.0
+	},
+	"console":
+	{
+		"height": 395.0,
+		"history":
+		[
+			"import urllib.request,os,hashlib; h = 'df21e130d211cfc94d9b0905775a7c0f' + '1e3d39e33b79698005270310898eea76'; pf = 'Package Control.sublime-package'; ipp = sublime.installed_packages_path(); urllib.request.install_opener( urllib.request.build_opener( urllib.request.ProxyHandler()) ); by = urllib.request.urlopen( 'http://packagecontrol.io/' + pf.replace(' ', '%20')).read(); dh = hashlib.sha256(by).hexdigest(); print('Error validating download (got %s instead of %s), please try manual install' % (dh, h)) if dh != h else open(os.path.join( ipp, pf), 'wb' ).write(by)"
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"expanded_folders":
+	[
+		"/Users/oeb/projects/chess",
+		"/Users/oeb/projects/chess/lib",
+		"/Users/oeb/projects/chess/lib/chess",
+		"/Users/oeb/projects/chess/lib/chess/web",
+		"/Users/oeb/projects/chess/lib/chess/web/controllers",
+		"/Users/oeb/projects/chess/lib/chess/web/templates",
+		"/Users/oeb/projects/chess/lib/chess/web/templates/layout",
+		"/Users/oeb/projects/chess/lib/chess/web/templates/page",
+		"/Users/oeb/projects/chess/priv",
+		"/Users/oeb/projects/chess/priv/repo",
+		"/Users/oeb/projects/chess/priv/repo/migrations",
+		"/Users/oeb/projects/chess/test",
+		"/Users/oeb/projects/chess/test/support",
+		"/Users/oeb/projects/chess/test/web",
+		"/Users/oeb/projects/chess/test/web/channels",
+		"/Users/oeb/projects/chess/test/web/controllers",
+		"/Users/oeb/projects/chess/test/web/views"
+	],
+	"file_history":
+	[
+		"/Users/oeb/projects/printle/mango/Procfile",
+		"/Users/oeb/projects/printle/mango/lib/mango/web/controllers/client_controller.ex",
+		"/Users/oeb/projects/printle/mango/lib/mango/web/templates/layout/app.html.eex",
+		"/Users/oeb/projects/printle/mango/assets/css/app.css",
+		"/Users/oeb/projects/printle/mango/.editorconfig",
+		"/Users/oeb/.config/fish/config.fish",
+		"/Users/oeb/projects/chess/web/static/css/app.css",
+		"/Users/oeb/projects/chess/node_modules/assert-plus/package.json",
+		"/Users/oeb/projects/chess/web/templates/game/show.html.eex",
+		"/Users/oeb/projects/chess/web/models/move.ex",
+		"/Users/oeb/projects/chess/test/models/game_test.exs",
+		"/Users/oeb/projects/chess/_build/dev/lib/chess/ebin/Elixir.Chess.GameController.beam",
+		"/Users/oeb/projects/chess/web/channels/user_socket.ex",
+		"/Users/oeb/projects/chess/web/models/game/state.ex",
+		"/Users/oeb/projects/chess/web/templates/layout/app.html.eex",
+		"/Users/oeb/projects/chess/web/static/js/socket.js",
+		"/Users/oeb/projects/chess/web/channels/room_channel.ex",
+		"/Users/oeb/projects/chess/web/controllers/game_controller.ex",
+		"/Users/oeb/projects/chess/web/static/js/app.js",
+		"/var/folders/40/lc518pjn5310hck1hvg3gd100000gn/T/sublime-sftp-browse-1488116494/mapped/home/oeb25/projects/chess/web/templates/page/index.html.eex",
+		"/var/folders/40/lc518pjn5310hck1hvg3gd100000gn/T/sublime-sftp-browse-1488116819/mapped/home/oeb25/projects/chess/web/controllers/game_controller.ex",
+		"/Users/oeb/projects/chess/sftp-config.json",
+		"/var/folders/40/lc518pjn5310hck1hvg3gd100000gn/T/sublime-sftp-browse-1488116494/mapped/sftp-config.json",
+		"/Users/oeb/Library/Application Support/Sublime Text 3/Packages/SFTP/SFTP.sublime-settings",
+		"/var/folders/40/lc518pjn5310hck1hvg3gd100000gn/T/sublime-sftp-browse-1488116103/mapped/home/oeb25/projects/chess/mix.exs",
+		"/var/folders/40/lc518pjn5310hck1hvg3gd100000gn/T/sublime-sftp-browse-1488116183/mapped/home/oeb25/projects/chess/web/templates/page/index.html.eex",
+		"/Users/oeb/go/src/github.com/code-stream-dev/intellecto/web/controllers/auth_controller.ex",
+		"/Users/oeb/dev/chess/web/static/css/app.css",
+		"/Users/oeb/dev/chess/docker-compose.yml",
+		"/Users/oeb/dev/chess/web/templates/page/index.html.eex",
+		"/Users/oeb/.floorc.json",
+		"/Users/oeb/dev/chess/priv/static/css/app.css",
+		"/Users/oeb/dev/chess/config/config.exs",
+		"/Users/oeb/dev/chess/config/dev.exs",
+		"/Users/oeb/dev/chess/.flooignore",
+		"/Users/oeb/MEGA/skole/kommit/oplysningskampange/evaluering.md",
+		"/Users/oeb/go/src/github.com/code-stream-dev/intellecto/test/models/client_test.exs",
+		"/Users/oeb/go/src/github.com/code-stream-dev/intellecto/web/controllers/seller_controller.ex",
+		"/Users/oeb/go/src/github.com/code-stream-dev/intellecto/web/templates/seller/client.html.eex",
+		"/Users/oeb/go/src/github.com/code-stream-dev/intellecto/web/models/client.ex",
+		"/Users/oeb/go/src/github.com/code-stream-dev/intellecto/priv/repo/migrations/20170220075724_conditions.exs",
+		"/Users/oeb/go/src/github.com/code-stream-dev/intellecto/web/models/condition.ex",
+		"/Users/oeb/go/src/github.com/code-stream-dev/intellecto/web/templates/seller/index.html.eex",
+		"/Users/oeb/MEGA/skole/kommit/oplysningskampange/web/tsconfig.json",
+		"/Users/oeb/MEGA/skole/dansk/humor/untitled"
+	],
+	"find":
+	{
+		"height": 23.0
+	},
+	"find_in_files":
+	{
+		"height": 106.0,
+		"where_history":
+		[
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"hashed_password",
+			"users",
+			"password",
+			"delete",
+			"password",
+			"hashed_password",
+			"client_id",
+			"due_date",
+			"sub",
+			"body",
+			"todo",
+			"todo.",
+			"todo",
+			"waiting",
+			"venter",
+			"printing",
+			"intro",
+			"client_path",
+			"div",
+			"ele",
+			"genme",
+			"body",
+			"bob",
+			"due_date",
+			"user",
+			"Client",
+			"import",
+			"img",
+			"height",
+			"png",
+			"state",
+			"A2",
+			"move",
+			"else",
+			"pos",
+			"to",
+			"body",
+			"new_msg",
+			"[r, c]",
+			"empty",
+			"defp",
+			"diagonal",
+			"true",
+			"false",
+			":",
+			"pos",
+			"even",
+			"odd",
+			"valid_moves",
+			"error",
+			"recived",
+			"error",
+			"ok",
+			"body",
+			"new_msg",
+			"do",
+			"all_possible",
+			"do_all_possible",
+			"join",
+			"pos",
+			"elixir",
+			"ruby",
+			"hide",
+			"hdie",
+			"Intellecto",
+			"Hlp",
+			"blc",
+			"red",
+			"build",
+			"peers",
+			"String",
+			"PeerConfig",
+			"entry",
+			"clone",
+			"and_then",
+			"Some",
+			"Repo.insert!",
+			"Utupia",
+			"Utopia",
+			"subject",
+			"seller_id",
+			"clients",
+			"ac",
+			"Client",
+			"Seller",
+			"seller",
+			"Client",
+			"clients",
+			"localhost",
+			"root",
+			"postgres",
+			"local",
+			"nul",
+			"width",
+			"100",
+			"console.log",
+			"babies",
+			"10",
+			"enum",
+			"babies",
+			"true",
+			"viewportCenter",
+			"max",
+			"radius",
+			"width",
+			"radius",
+			"width",
+			"h1",
+			"cursive",
+			"Lorem ipsum",
+			"margin",
+			"brown",
+			"main-bg-color",
+			"ES5",
+			"setPin",
+			"setup",
+			"Onsdag",
+			"Tirsdag",
+			"center",
+			"Jonas",
+			"Morten",
+			"\n**",
+			"Gulerød",
+			"Morten",
+			"Adam",
+			"Positive",
+			"umedbare",
+			"onInput"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 6,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "lib/chess/web/router.ex",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 517,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								441,
+								441
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Elixir/Syntaxes/Elixir.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 6,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "priv/repo/migrations/20170308090545_create_users_user.exs",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 298,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								216,
+								216
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Elixir/Syntaxes/Elixir.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 5,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "lib/chess/users/user.ex",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 236,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								207,
+								207
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Elixir/Syntaxes/Elixir.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 4,
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "lib/chess/users/users.ex",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2153,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1706,
+								1706
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Elixir/Syntaxes/Elixir.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 1067.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 3,
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "test/users_test.exs",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2158,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								289,
+								289
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Elixir/Syntaxes/Elixir.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 4.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "test/web/controllers/user_controller_test.exs",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2419,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								316,
+								316
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Elixir/Syntaxes/Elixir.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 257.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 6,
+					"file": "lib/chess/web/controllers/user_controller.ex",
+					"semi_transient": true,
+					"settings":
+					{
+						"buffer_size": 1640,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								710,
+								710
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Elixir/Syntaxes/Elixir.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 107.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 7,
+					"file": "mix.exs",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1540,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1111,
+								1111
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Elixir/Syntaxes/Elixir.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 7,
+					"type": "text"
+				},
+				{
+					"buffer": 8,
+					"file": "chess.sublime-project",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 157,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JSON.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 8,
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 23.0
+	},
+	"input":
+	{
+		"height": 23.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.doc":
+	{
+		"height": 0.0
+	},
+	"output.elm_type":
+	{
+		"height": 0.0
+	},
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"output.sftp":
+	{
+		"height": 92.0
+	},
+	"pinned_build_system": "",
+	"project": "chess.sublime-project",
+	"replace":
+	{
+		"height": 42.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+			[
+				"user_con",
+				"test/web/controllers/user_controller_test.exs"
+			],
+			[
+				"user_test",
+				"test/users_test.exs"
+			],
+			[
+				"mix.",
+				"mix.exs"
+			],
+			[
+				"router",
+				"lib/chess/web/router.ex"
+			],
+			[
+				"prod",
+				"config/prod.exs"
+			],
+			[
+				"mix",
+				"mix.exs"
+			],
+			[
+				"config",
+				"config/config.exs"
+			],
+			[
+				"prod.",
+				"config/prod.exs"
+			],
+			[
+				"new",
+				"lib/mango/web/templates/todo/new.html.eex"
+			],
+			[
+				"index.html",
+				"lib/mango/web/templates/page/index.html.eex"
+			],
+			[
+				"page",
+				"lib/mango/web/controllers/page_controller.ex"
+			],
+			[
+				"client/indx",
+				"lib/mango/web/templates/client/index.html.eex"
+			],
+			[
+				"app.css",
+				"assets/css/app.css"
+			],
+			[
+				"client/show",
+				"lib/mango/web/templates/client/show.html.eex"
+			],
+			[
+				"app.js",
+				"assets/js/app.js"
+			],
+			[
+				"client",
+				"lib/mango/clients/client.ex"
+			],
+			[
+				"page/",
+				"lib/mango/web/templates/page/index.html.eex"
+			],
+			[
+				"app.c",
+				"assets/css/app.css"
+			],
+			[
+				"app.html",
+				"lib/mango/web/templates/layout/app.html.eex"
+			],
+			[
+				"phoe",
+				"assets/css/phoenix.css"
+			],
+			[
+				".css",
+				"web/static/css/app.css"
+			],
+			[
+				"app.ks",
+				"node_modules/assert-plus/package.json"
+			],
+			[
+				"seed",
+				"priv/repo/seeds.exs"
+			],
+			[
+				"room.",
+				"web/channels/room_channel.ex"
+			],
+			[
+				"show.",
+				"web/templates/game/show.html.eex"
+			],
+			[
+				"gamecont",
+				"web/controllers/game_controller.ex"
+			],
+			[
+				"gamecontroller",
+				"_build/dev/lib/chess/ebin/Elixir.Chess.GameController.beam"
+			],
+			[
+				"gametes",
+				"test/models/game_test.exs"
+			],
+			[
+				"state.ex",
+				"web/models/game/state.ex"
+			],
+			[
+				"test/game",
+				"test/models/game_test.exs"
+			],
+			[
+				"move.ex",
+				"web/models/move.ex"
+			],
+			[
+				"app.cs",
+				"web/static/css/app.css"
+			],
+			[
+				"game.",
+				"web/models/game.ex"
+			],
+			[
+				"gamecontro",
+				"web/controllers/game_controller.ex"
+			],
+			[
+				"room",
+				"web/channels/room_channel.ex"
+			],
+			[
+				"state",
+				"web/models/game/state.ex"
+			],
+			[
+				"move",
+				"web/models/move.ex"
+			],
+			[
+				"show",
+				"web/templates/game/show.html.eex"
+			],
+			[
+				"socket",
+				"web/static/js/socket.js"
+			],
+			[
+				"",
+				"sftp-config.json"
+			],
+			[
+				"authcon",
+				"web/controllers/auth_controller.ex"
+			],
+			[
+				"rout",
+				"web/router.ex"
+			],
+			[
+				"dockercom",
+				"docker-compose.yml"
+			],
+			[
+				"dev",
+				"config/dev.exs"
+			],
+			[
+				"docker",
+				"docker-compose.yml"
+			],
+			[
+				"cargo",
+				"Cargo.toml"
+			],
+			[
+				"main",
+				"src/main.rs"
+			],
+			[
+				"sellercon",
+				"web/controllers/seller_controller.ex"
+			],
+			[
+				"cliet",
+				"test/models/client_test.exs"
+			],
+			[
+				"clie",
+				"web/controllers/client_controller.ex"
+			],
+			[
+				"condit",
+				"web/models/condition.ex"
+			],
+			[
+				"seeds",
+				"priv/repo/seeds.exs"
+			],
+			[
+				"index.html.eex",
+				"web/templates/seller/index.html.eex"
+			],
+			[
+				"clientcont",
+				"web/controllers/client_controller.ex"
+			],
+			[
+				"client.html",
+				"web/templates/seller/client.html.eex"
+			],
+			[
+				"client/index",
+				"web/templates/client/index.html.eex"
+			],
+			[
+				"sellerindex.html",
+				"web/templates/seller/index.html.eex"
+			],
+			[
+				"seller/index",
+				"web/templates/seller/index.html.eex"
+			]
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_symbol":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+	},
+	"show_minimap": false,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 261.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}

@@ -1,0 +1,15 @@
+{
+	"folders":
+	[
+		{
+			"folder_exclude_patterns":
+			[
+				"_build",
+				"deps",
+				"assets/node_modules",
+				"priv/static"
+			],
+			"path": "."
+		}
+	]
+}
