@@ -22,6 +22,8 @@ defmodule Chess.Web.Router do
   # Other scopes may use custom stacks.
   scope "/api", Chess.Web do
     pipe_through :api
+
+    resources "/games", GameController, except: [:new, :edit]
     resources "/users", UserController, except: [:new, :edit]
   end
 end

@@ -11,6 +11,11 @@
 # and so on) as they will fail if something goes wrong.
 
 alias Chess.Auth
+alias Chess.Games
+
+
+
+# Users
 
 {:ok, jenner} = Auth.create_user(%{
 	name: "jenner",
@@ -29,3 +34,28 @@ alias Chess.Auth
   email: "oespringbord@gmail.com",
   password: "123pass"
 })
+
+
+
+# Games
+{:ok, rule_set} = %{
+  type: :standard,
+  time_limit: :infinite,
+} |> Games.RuleSet.cast
+
+
+{:ok, game1} = Games.create_game(%{
+  white: %{
+    type: :anonymus,
+    user_id: "retrstrdiuoaupyoift",
+  },
+  black: %{
+    type: :anonymus,
+    user_id: "sadljhlgoilruahsdu6",
+  },
+  actions: [
+    %{type: :move, from: :A2, to: :A3}
+  ],
+  rule_set: rule_set,
+})
+

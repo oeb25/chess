@@ -38,6 +38,8 @@ defmodule Chess.Mixfile do
      {:gettext, "~> 0.11"},
      {:cowboy, "~> 1.0"},
      {:poison, "~> 3.0"},
+     {:credo, "~> 0.5", only: [:dev, :test]},
+     {:dialyxir, "~> 0.5", only: [:dev], runtime: false},
      {:comeonin, "~> 3.0"}]
   end
 
