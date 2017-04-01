@@ -22,7 +22,6 @@ alias Chess.Games
   email: "ibidims@hotmail.com",
   password: "123pass"
 })
-
 {:ok, oliver} = Auth.create_user(%{
   name: "oliver",
   email: "oliverboving@gmail.com",
@@ -43,15 +42,14 @@ alias Chess.Games
   time_limit: :infinite,
 } |> Games.RuleSet.cast
 
-
 {:ok, game1} = Games.create_game(%{
   white: %{
     type: :anonymus,
-    user_id: "retrstrdiuoaupyoift",
+    token: "retrstrdiuoaupyoift",
   },
   black: %{
     type: :anonymus,
-    user_id: "sadljhlgoilruahsdu6",
+    token: "sadljhlgoilruahsdu6",
   },
   actions: [
     %{type: :move, from: :A2, to: :A3}

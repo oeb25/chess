@@ -7,6 +7,9 @@ defmodule Chess.Games do
   alias Chess.Repo
 
   alias Chess.Games.Game
+  alias Chess.Games.Board
+  alias Chess.Games.Square
+  alias Chess.Games.Action
 
   @doc """
   Returns the list of games.
@@ -18,7 +21,7 @@ defmodule Chess.Games do
 
   """
   def list_games do
-    Repo.all(Game)
+    for game <- Repo.all(Game), do: game |> Game.compute_board
   end
 
   @doc """
@@ -106,5 +109,29 @@ defmodule Chess.Games do
     game
     |> cast(attrs, [:white, :black, :actions, :rule_set])
     |> validate_required([:white, :black, :actions, :rule_set])
+  end
+
+  def moves_for(%Game{} = game, sq) do
+    game = game |> Game.compute_board
+
+    Board.moves_for game.board, sq
+  end
+
+  def move(%Game{} = game, from, to) do
+    game = game |> Game.compute_board
+    whos_turn = game |> Game.whos_turn
+
+    case game.board |> Board.at from do
+      :empty -> :error
+      {color, _} when color != whos_turn -> :error
+      _ ->
+        if to in Board.moves_for game.board, from do
+          actions = game.actions ++ [%{type: :move, from: from, to: to} |> Action.cast!]
+
+          update_game(game, %{actions: actions})
+        else
+          :error
+        end
+    end
   end
 end

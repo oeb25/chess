@@ -16,6 +16,7 @@ config :chess, Chess.Repo,
   password: "postgres",
   database: "chess_test",
   hostname: "localhost",
+  ownership_timeout: 60_000,
   pool: Ecto.Adapters.SQL.Sandbox
 
 config :comeonin, :bcrypt_log_rounds, 4

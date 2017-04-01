@@ -11,7 +11,7 @@ defmodule Chess.GamesTest do
     ],
     black: %{
       type: :anonymus,
-      user_id: "retrstrdiuoaupyoift"
+      token: "retrstrdiuoaupyoift"
     },
     rule_set: %{
       type: :standard,
@@ -19,7 +19,7 @@ defmodule Chess.GamesTest do
     },
     white: %{
       type: :anonymus,
-      user_id: "retrstrdiuoaupyoift"
+      token: "retrstrdiuoaupyoift"
     }
   }
   @update_attrs %{
@@ -28,7 +28,7 @@ defmodule Chess.GamesTest do
       %{type: :move, from: :A7, to: :A5}
     ],
     black: %{
-      type: :user,
+      type: :logged_in,
       user_id: "retrstrdiuoaupyoift"
     },
     rule_set: %{
@@ -36,7 +36,7 @@ defmodule Chess.GamesTest do
       time_limit: 12364,
     },
     white: %{
-      type: :user,
+      type: :logged_in,
       user_id: "retrstrdiuoaupyoift"
     }
   }
@@ -47,14 +47,18 @@ defmodule Chess.GamesTest do
     game
   end
 
+  def reset(b) do
+    b |> Map.put(:board, :not_computed)
+  end
+
   test "list_games/1 returns all games" do
     game = fixture(:game)
-    assert Games.list_games() == [game]
+    assert Games.list_games() == [game |> Game.compute_board]
   end
 
   test "get_game! returns the game with given id" do
     game = fixture(:game)
-    assert Games.get_game!(game.id) == game
+    assert Games.get_game!(game.id) == game |> reset
   end
 
   test "create_game/1 with valid data creates a game" do
@@ -63,17 +67,15 @@ defmodule Chess.GamesTest do
     assert game.actions == [
       %Move{from: :A2, to: :A3},
     ]
-    assert game.black == %Participant{
-      type: :anonymus,
-      user_id: "retrstrdiuoaupyoift"
+    assert game.black == %Participant.Anonymus{
+      token: "retrstrdiuoaupyoift"
     }
     assert game.rule_set == %RuleSet{
       type: :standard,
       time_limit: :infinite
     }
-    assert game.white == %Participant{
-      type: :anonymus,
-      user_id: "retrstrdiuoaupyoift"
+    assert game.white == %Participant.Anonymus{
+      token: "retrstrdiuoaupyoift"
     }
   end
 
@@ -90,16 +92,14 @@ defmodule Chess.GamesTest do
       %Move{from: :A2, to: :A3},
       %Move{from: :A7, to: :A5}
     ]
-    assert game.black == %Participant{
-      type: :user,
+    assert game.black == %Participant.LoggedIn{
       user_id: "retrstrdiuoaupyoift"
     }
     assert game.rule_set == %RuleSet{
       type: :standard,
       time_limit: 12364,
     }
-    assert game.white == %Participant{
-      type: :user,
+    assert game.white == %Participant.LoggedIn{
       user_id: "retrstrdiuoaupyoift"
     }
   end

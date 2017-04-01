@@ -22,6 +22,7 @@ defmodule Chess.Games.Square do
   end
   def cast(sq) when is_binary(sq), do: sq |> String.to_atom |> cast
   def cast(sq) when is_integer(sq) and sq in 0..63, do: @squares |> Enum.at(sq) |> cast
+  def cast([r, c]), do: {r, c} |> cast
   def cast({r, c})
     when is_integer(r) and is_integer(c) and r in 0..7 and c in 0..7,
     do: cast(c + r * 8)
@@ -34,7 +35,8 @@ defmodule Chess.Games.Square do
     sq = cast(a)
     case sq do
       {:ok, sq} -> sq
-      _ -> raise "Could not cast square"
+      _ ->
+        raise "Could not cast square"
     end
   end
 

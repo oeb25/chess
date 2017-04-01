@@ -2,17 +2,6 @@ defmodule Chess.Games.Board do
   @behaviour Ecto.Type
   def type, do: :array
 
-  alias Chess.Games.{Square, Board}
-
-  @spec cast(t) :: {:ok, t}
-  def cast(a), do: {:ok, a}
-
-  @spec load(t) :: :error
-  def load(_), do: :error
-
-  @spec dump(t) :: :error
-  def dump(_), do: :error
-
   @standard_board [
     {:black, :rook}, {:black, :knight}, {:black, :bishop}, {:black, :queen}, {:black, :king}, {:black, :bishop}, {:black, :knight}, {:black, :rook},
     {:black, :pawn}, {:black, :pawn}, {:black, :pawn}, {:black, :pawn}, {:black, :pawn}, {:black, :pawn}, {:black, :pawn}, {:black, :pawn},
@@ -24,21 +13,34 @@ defmodule Chess.Games.Board do
     {:white, :rook}, {:white, :knight}, {:white, :bishop}, {:white, :king}, {:white, :queen}, {:white, :bishop}, {:white, :knight}, {:white, :rook}
   ]
 
-  def standard_board, do: @standard_board
+  defstruct pieces: @standard_board
+
+  alias Chess.Games.{Square, Board}
+
+  @spec cast(t) :: {:ok, t}
+  def cast(a), do: {:ok, a}
+
+  @spec load(t) :: :error
+  def load(_), do: :error
+
+  @spec dump(t) :: :error
+  def dump(_), do: :error
+
+  def standard_board, do: %__MODULE__{pieces: @standard_board}
 
   @type piece_type :: :rook | :knight | :bishop | :queen | :king | :pawn
   @type suit :: :black | :white
   @type piece :: {suit, piece_type} | :empty
-  @type t :: [piece]
+  @type t :: :not_computed | %__MODULE__{pieces: [piece]}
 
   @spec at(t, Square.t) :: piece
-  def at(board, sq) do
-    board |> Enum.at(sq |> Square.to_index)
+  def at(%__MODULE__{pieces: pieces}, sq) do
+    pieces |> Enum.at(sq |> Square.to_index)
   end
 
   @spec put(t, Square.t, piece) :: t
-  def put(board, sq, piece) do
-    board |> List.replace_at(sq |> Square.to_index, piece)
+  def put(%__MODULE__{pieces: pieces} = b, sq, piece) do
+    %{b | pieces: pieces |> List.replace_at(sq |> Square.to_index, piece)}
   end
 
   @spec moves_for(t, Square.t) :: [Square.t]
@@ -263,3 +265,19 @@ defmodule Chess.Games.Board.Context do
     ctx
   end
 end
+
+defimpl Poison.Encoder, for: Chess.Games.Board do
+  alias Chess.Games.Board
+
+  def encode(%Board{pieces: pieces}, _opts) do
+    ps = for p <- pieces do
+      case p do
+        {suit, piece} -> [suit |> Atom.to_string, piece |> Atom.to_string]
+        :empty -> "empty"
+      end
+    end
+
+    %{pieces: ps |> Enum.chunk(8)} |> Poison.encode!
+  end
+end
+

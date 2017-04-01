@@ -1,32 +1,45 @@
-defmodule Chess.Games.Participant do
-  # @enforce_keys [:kind, :time_limit]
-  defstruct [:type, :user_id]
+defmodule Chess.Games.Participant.LoggedIn do
+  defstruct [:user_id]
+  @type t :: %__MODULE__{user_id: String.t}
+end
 
+defmodule Chess.Games.Participant.Anonymus do
+  defstruct [:token]
+  @type t :: %__MODULE__{token: String.t}
+end
+
+defmodule Chess.Games.Participant do
   @behaviour Ecto.Type
   def type, do: :json
 
-  @types [:anonymus, :user]
-  @type t :: %__MODULE__{type: :anonymus | :user, user_id: String.t}
+  alias Chess.Games.Participant.{Anonymus, LoggedIn}
+
+  @types [:anonymus, :logged_in]
+  @type t :: LoggedIn.t | Anonymus.t
 
   # Provide our own casting rules.
 
   # We should still accept integers
-  @spec cast(t | %{type: String.t, user_id: String.t}) :: {:ok, t} | :error
-  def cast(%__MODULE__{type: t} = rs)
-    when is_binary(t)
+  @spec cast(t | %{type: String.t}) :: {:ok, t} | :error
+  def cast(%{type: :logged_in, user_id: user_id})
+    when is_binary(user_id)
   do
-    %{rs | type: String.to_atom(t)} |> cast
+    {:ok, %LoggedIn{user_id: user_id}}
   end
 
-  def cast(%__MODULE__{type: t, user_id: user_id})
-    when t in @types and is_binary(user_id)
+  def cast(%{type: :anonymus, token: token})
+    when is_binary(token)
   do
-    {:ok, %__MODULE__{type: t, user_id: user_id}}
+    {:ok, %Anonymus{token: token}}
   end
 
-  def cast(%{"type" => t, "user_id" => user_id}), do: %{type: t, user_id: user_id} |> cast
-  def cast(%{type: t, user_id: user_id}) do
-    %__MODULE__{type: t, user_id: user_id} |> cast
+  def cast(%{"type" => _} = ac) do
+    cast for {key, val} <- ac,
+      into: %{},
+      do: {
+        String.to_atom(key),
+        if key == "type" do String.to_atom(val) else val end
+      }
   end
 
   # Everything else is a failure though
@@ -35,6 +48,7 @@ defmodule Chess.Games.Participant do
   # When loading data from the database, we are guaranteed to
   # receive an integer (as databases are strict) and we will
   # just return it to be stored in the schema struct.
+  @spec load(String.t) :: {:ok, t} | :error
   def load(rs) do
     rs |> Poison.decode! |> cast
   end
@@ -42,12 +56,17 @@ defmodule Chess.Games.Participant do
   # When dumping data to the database, we *expect* an integer
   # but any value could be inserted into the struct, so we need
   # guard against them.
-  def dump(%__MODULE__{type: t, user_id: user_id})
-    when t in @types and is_binary(user_id)
-  do
+  @spec dump(t) :: {:ok, String.t} | :error
+  def dump(%LoggedIn{user_id: user_id}) do
     Poison.encode(%{
-      "type" => Atom.to_string(t),
+      "type" => "logged_in",
       "user_id" => user_id
+    })
+  end
+  def dump(%Anonymus{token: token}) do
+    Poison.encode(%{
+      "type" => "anonymus",
+      "token" => token
     })
   end
   def dump(_), do: :error

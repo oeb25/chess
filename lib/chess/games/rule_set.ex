@@ -6,38 +6,41 @@ defmodule Chess.Games.RuleSet do
   def type, do: :json
 
   @types [:standard]
-  @type t :: %__MODULE__{type: :standard, time_limit: integer | :infinite}
+  @type types :: :standard
+  @type t :: %__MODULE__{type: types, time_limit: integer | :infinite}
 
   # Provide our own casting rules.
   # def cast(%{"type" => type, "time_limit" => time_limit}), do: %{type: t, time_limit: time_limit}
 
   # We should still accept integers
-  @spec cast(t | %{type: String.t, time_limit: String.t | integer}) :: {:ok, t} | :error
-  def cast(%__MODULE__{type: t} = rs)
-    when is_binary(t)
-  do
-    %{rs | type: String.to_atom(t)} |> cast
-  end
-
-  def cast(%__MODULE__{time_limit: "infinite"} = rs) do
-    %{rs | time_limit: :infinite} |> cast
-  end
-
+  @spec cast(t | %{type: String.t | types, time_limit: :infinite | String.t | integer}) :: {:ok, t} | :error
   def cast(%__MODULE__{type: t, time_limit: time_limit} = rs)
     when t in @types and (is_integer(time_limit) or time_limit == :infinite)
   do
     {:ok, rs}
   end
 
-  def cast(%{"type" => t, "time_limit" => time_limit}) do
-    %__MODULE__{type: t, time_limit: time_limit} |> cast
+  def cast(%{time_limit: "infinite"} = rs) do
+    %{rs | time_limit: :infinite} |> cast
   end
-  def cast(%{type: t, time_limit: time_limit}) do
+
+  def cast(%{type: t, time_limit: time_limit} = rs) do
     %__MODULE__{type: t, time_limit: time_limit} |> cast
   end
 
+  def cast(%{"type" => _} = ac) do
+    cast for {key, val} <- ac,
+      into: %{},
+      do: {
+        String.to_atom(key),
+        if key in ["type"] do String.to_atom(val) else val end
+      }
+  end
+
   # Everything else is a failure though
-  def cast(_), do: :error
+  def cast(d) do
+    :error
+  end
 
   # When loading data from the database, we are guaranteed to
   # receive an integer (as databases are strict) and we will
