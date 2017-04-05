@@ -1,28 +1,33 @@
 /* This file is for your main application css. */
 
+* {
+  transition: all 1000ms ease;
+}
+
 /* Board CSS */
-.piece {
-    width: 12%;
+.piece-square {
+    width: 12.5%;
     height: 0;
     display: inline-block;
     margin: 0;
-    padding: 0 0 12% 0;
+    padding: 0 0 12.5% 0;
     background-color: #eee;
     background-size: cover;
     box-sizing: border-box;
     position: relative;
 }
-.row {
-    display: flex;
+.chess-row {
+    /*display: flex;*/
+    margin-bottom: -5px;
 }
-.row:nth-child(odd) .piece:nth-child(even) {
+.chess-row:nth-child(odd) .piece-square:nth-child(even) {
     background-color: #8a6d3b;
 }
-.row:nth-child(even) .piece:nth-child(odd) {
+.chess-row:nth-child(even) .piece-square:nth-child(odd) {
     background-color: #8a6d3b;
 }
 
-.piece.highlight:after {
+.piece-square.highlight:after {
   content: '';
   background-color: rgba(100, 220, 100, 0.5);
   position: absolute;
@@ -30,6 +35,15 @@
   left: 0;
   bottom: 0;
   right: 0;
+}
+
+.piece {
+  width: 100%;
+  padding-bottom: 100%;
+  background-size: cover;
+  display: block;
+  background-image: url(http://mineblocks.com/1/wiki/images/5/59/Empty.png);
+  transition: background 200ms ease, transform 1000ms ease;
 }
 
 .piece.black.pawn {

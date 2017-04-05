@@ -45,7 +45,7 @@ defmodule Chess.Web.GameChannel do
       [r, c]
     end
 
-    {:reply, {:ok, %{"moves" => moves }}, socket}
+    {:reply, {:ok, %{"moves" => moves}}, socket}
   end
 
   def handle_in("move", %{"from" => from, "to" => to}, socket) do

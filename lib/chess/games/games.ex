@@ -117,11 +117,12 @@ defmodule Chess.Games do
     Board.moves_for game.board, sq
   end
 
+  @spec move(Game.t, Square.t, Square.T) :: {:ok, Game.t} | {:error, %Ecto.Changeset{}} | :error
   def move(%Game{} = game, from, to) do
     game = game |> Game.compute_board
     whos_turn = game |> Game.whos_turn
 
-    case game.board |> Board.at from do
+    case game.board |> Board.at(from) do
       :empty -> :error
       {color, _} when color != whos_turn -> :error
       _ ->

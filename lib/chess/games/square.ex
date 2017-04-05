@@ -23,6 +23,8 @@ defmodule Chess.Games.Square do
   def cast(sq) when is_binary(sq), do: sq |> String.to_atom |> cast
   def cast(sq) when is_integer(sq) and sq in 0..63, do: @squares |> Enum.at(sq) |> cast
   def cast([r, c]), do: {r, c} |> cast
+  def cast({r, c}) when is_float(r) or is_float(c),
+    do: {r |> round, c |> round} |> cast
   def cast({r, c})
     when is_integer(r) and is_integer(c) and r in 0..7 and c in 0..7,
     do: cast(c + r * 8)

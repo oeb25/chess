@@ -3,14 +3,22 @@ defmodule Chess.Games.Board do
   def type, do: :array
 
   @standard_board [
-    {:black, :rook}, {:black, :knight}, {:black, :bishop}, {:black, :queen}, {:black, :king}, {:black, :bishop}, {:black, :knight}, {:black, :rook},
-    {:black, :pawn}, {:black, :pawn}, {:black, :pawn}, {:black, :pawn}, {:black, :pawn}, {:black, :pawn}, {:black, :pawn}, {:black, :pawn},
+    {:black, :rook}, {:black, :knight}, {:black, :bishop}, {:black, :queen},
+    {:black, :king}, {:black, :bishop}, {:black, :knight}, {:black, :rook},
+
+    {:black, :pawn}, {:black, :pawn}, {:black, :pawn}, {:black, :pawn},
+    {:black, :pawn}, {:black, :pawn}, {:black, :pawn}, {:black, :pawn},
+
     :empty, :empty, :empty, :empty, :empty, :empty, :empty, :empty,
     :empty, :empty, :empty, :empty, :empty, :empty, :empty, :empty,
     :empty, :empty, :empty, :empty, :empty, :empty, :empty, :empty,
     :empty, :empty, :empty, :empty, :empty, :empty, :empty, :empty,
-    {:white, :pawn}, {:white, :pawn}, {:white, :pawn}, {:white, :pawn}, {:white, :pawn}, {:white, :pawn}, {:white, :pawn}, {:white, :pawn},
-    {:white, :rook}, {:white, :knight}, {:white, :bishop}, {:white, :king}, {:white, :queen}, {:white, :bishop}, {:white, :knight}, {:white, :rook}
+
+    {:white, :pawn}, {:white, :pawn}, {:white, :pawn}, {:white, :pawn},
+    {:white, :pawn}, {:white, :pawn}, {:white, :pawn}, {:white, :pawn},
+
+    {:white, :rook}, {:white, :knight}, {:white, :bishop}, {:white, :king},
+    {:white, :queen}, {:white, :bishop}, {:white, :knight}, {:white, :rook}
   ]
 
   defstruct pieces: @standard_board
@@ -108,7 +116,6 @@ defmodule Chess.Games.Board.Context do
       {:ok, pos} -> {board, sq, moves ++ [pos]}
       _ -> ctx
     end
-
   end
 
   @spec can_see?(ctx) :: ctx
@@ -155,22 +162,38 @@ defmodule Chess.Games.Board.Context do
     end
   end
 
+  @spec squares_to(Square.t, Square.t) :: [Square.t]
+  defp squares_to(from, to) do
+    [{r1, c1}, {r2, c2}] = for s <- [from, to], do: s |> Square.to_indicies
+
+    {rd, cd} = {r2 - r1, c2 - c1}
+
+    if abs(rd) == abs(cd) or rd == 0 or cd == 0 do
+      [ra, ca] = for a <- [rd, cd] do
+        case a  do
+          0 -> 0
+          a -> a / abs(a)
+        end
+      end
+
+      d = max(abs(rd), abs(cd))
+
+      for i <- 1..d, do: {ra * i + r1, ca * i + c1} |> Square.cast!
+    else
+      []
+    end
+  end
+
   @spec can_see?(ctx, Square.t) :: boolean
   defp can_see?({_, sq, _} = ctx, move) do
-    {r1, c1} = sq |> Square.to_indicies
-    {r2, c2} = move |> Square.to_indicies
+    res = for pos <- squares_to(sq, move),
+      !empty?(ctx, pos),
+      do: pos
 
-    if abs(r1 - r2) == abs(c1 - c2) or r1 == r2 or c1 == c2 do obstacles =
-      for x <- 0..(c2 - c1),
-        y <- 0..(r2 - r1),
-        pos <- [{r1 + y, c1 + x} |> Square.cast!],
-        pos != sq,
-        !empty?(ctx, pos),
-        do: pos
-
-      obstacles == []
-    else
-      false
+    case res do
+      [] -> true
+      [^move] -> true
+      _ -> false
     end
   end
 
@@ -244,12 +267,13 @@ defmodule Chess.Games.Board.Context do
     aa =
       ctx
       |> relative({i, 0})
-      |> empty?
 
-    a = case pos do
-      {^n, _} -> aa |> relative({2 * i, 0})
-      _ -> aa
-    end
+    a =
+      case pos do
+        {^n, _} -> aa |> relative({2 * i, 0})
+        _ -> aa
+      end
+      |> empty?
 
     b =
       ctx

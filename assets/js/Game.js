@@ -11,10 +11,9 @@ export default class Game extends React.Component {
     this.state = {
       game: null,
       moves: [],
-      selected: window.location.hash
-        .substr(1)
-        .split(',')
-        .map(a => parseInt(a, 10))
+      flip: false,
+      selected: window.location.hash &&
+        window.location.hash.substr(1).split(',').map(a => parseInt(a, 10))
     };
 
     this.channel = socket.channel('game:1', {});
@@ -30,7 +29,7 @@ export default class Game extends React.Component {
   }
 
   componentDidMount() {
-    this.movesFor(this.state.selected);
+    this.state.selected && this.movesFor(this.state.selected);
 
     this.channel.on('gamestate', game => {
       this.setState({ game });
@@ -53,8 +52,10 @@ export default class Game extends React.Component {
     const a = this.state.selected;
     const b = [r, c];
 
+    console.log(a, b);
+
     this.setState({ selected: null, moves: [] });
-    window.location.hash = '';
+    window.history.replaceState('', document.title, window.location.pathname);
 
     this.channel
       .push('move', { from: a, to: b })
@@ -62,9 +63,10 @@ export default class Game extends React.Component {
   }
 
   render() {
-    const { game, moves, selected } = this.state;
+    const { game, moves, selected, flip } = this.state;
 
     const click = ([r, c]) => {
+      console.log('clicking');
       const [color, piece] = game.board.pieces[r][c];
 
       if (contains(moves, [r, c])) {
@@ -76,8 +78,23 @@ export default class Game extends React.Component {
 
     return game
       ? <div>
-          {JSON.stringify(game.who)}
-          <Board board={game.board} highlights={moves} onClick={click} />
+          <label>
+            Vend brædtet
+            <input
+              type="checkbox"
+              onChange={e => this.setState({ flip: !!e.target.checked })}
+            />
+          </label>
+          <p>
+            Det er {game.who == 'white' ? 'hvids' : 'sorts'} tur
+          </p>
+          <Board
+            board={game.board}
+            highlights={moves}
+            onClick={click}
+            flip={flip}
+          />
+          <pre>{JSON.stringify(game.actions, 0, 2)}</pre>
         </div>
       : <h1>Loading game...</h1>;
   }
