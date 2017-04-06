@@ -17,8 +17,6 @@ defmodule Chess.Web.GameChannel do
       |> Game.compute_board
       |> render_game
 
-    send(self, "get_game_state")
-
     {:ok, game, socket
       |> assign(:id, game.id)}
   end
