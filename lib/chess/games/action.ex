@@ -16,13 +16,15 @@ defmodule Chess.Games.Action do
   @type t :: Move.t
 
   # Provide our own casting rules.
-  @spec cast(t | %{type: String.t}) :: {:ok, t} | :error
+  @spec cast(t | %{type: String.t}) :: {:ok, t}
+                                     | :error
+  def cast(%{type: t} = action) when is_binary(type),
+    do: %{action | type: t |> String.to_atom}
   def cast(%Move{from: from, to: to}) do
     with {:ok, from} <- from |> Square.cast,
          {:ok, to} <- to |> Square.cast,
          do: {:ok, %Move{from: from, to: to}}
   end
-  def cast(%{type: "move", from: from, to: to}), do: cast(%{type: :move, from: from, to: to})
   def cast(%{type: :move, from: from, to: to}) do
     %Move{from: from, to: to} |> cast
   end
@@ -30,6 +32,7 @@ defmodule Chess.Games.Action do
   # Everything else is a failure though
   def cast(_), do: :error
 
+  @spec cast!(t | %{type: String.t}) :: t
   def cast!(a) do
     sq = cast(a)
     case sq do
@@ -47,7 +50,13 @@ defmodule Chess.Games.Action do
     with {:ok, s} <- sq |> Poison.decode do
       case s do
         %{"type" => "move", "from" => from, "to" => to} ->
-          {:ok, %Move{from: from |> Square.cast!, to: to |> Square.cast!}}
+          {
+            :ok,
+            %Move{
+              from: from |> Square.cast!,
+              to: to |> Square.cast!
+            },
+          }
         _ -> :error
       end
     end

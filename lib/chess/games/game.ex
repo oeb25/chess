@@ -14,11 +14,18 @@ defmodule Chess.Games.Game do
   end
 
   # defstruct [:white, :black, :actions, :rule_set, :board]
-  @type t :: %__MODULE__{white: Piece.t, black: Piece.t, actions: Actions.t, rule_set: RuleSet.t, board: Board.t}
+  @type t :: %__MODULE__{
+    white: Piece.t,
+    black: Piece.t,
+    actions: Actions.t,
+    rule_set: RuleSet.t,
+    board: Board.t,
+  }
 
   @spec recompute_board(t) :: t
   def recompute_board(%__MODULE__{actions: actions} = game) do
-    actions |> Enum.reduce(%{game | board: Board.standard_board}, &perform_action(&2, &1))
+    actions
+      |> Enum.reduce(%{game | board: Board.standard_board}, &perform_action(&2, &1))
   end
 
   @spec compute_board(t) :: t
@@ -34,6 +41,7 @@ defmodule Chess.Games.Game do
     %{game | board: board |> Board.move(from, to)}
   end
 
+  @spec whos_turn(t) :: :white | :black
   def whos_turn(%__MODULE__{actions: actions} = game) do
     i =
       actions

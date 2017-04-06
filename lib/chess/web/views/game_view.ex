@@ -1,6 +1,7 @@
 defmodule Chess.Web.GameView do
   use Chess.Web, :view
   alias Chess.Web.GameView
+  alias Chess.Games.{Participant, Game}
 
   def render("index.json", %{games: games}) do
     %{data: render_many(games, GameView, "game.json")}
@@ -10,14 +11,14 @@ defmodule Chess.Web.GameView do
     %{data: render_one(game, GameView, "game.json")}
   end
 
-  def render("game.json", game = %Chess.Games.Game{}) do
+  def render("game.json", game = %Game{}) do
     render("game.json", %{game: game})
   end
   def render("game.json", %{game: game}) do
-    {:ok, white} = game.white |> Chess.Games.Participant.dump
-    {:ok, black} = game.black |> Chess.Games.Participant.dump
+    {:ok, white} = game.white |> Participant.dump
+    {:ok, black} = game.black |> Participant.dump
 
-    who = game |> Chess.Games.Game.whos_turn
+    who = game |> Game.whos_turn
 
     %{id: game.id,
       white: white |> Poison.decode!,

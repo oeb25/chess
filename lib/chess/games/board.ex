@@ -24,6 +24,7 @@ defmodule Chess.Games.Board do
   defstruct pieces: @standard_board
 
   alias Chess.Games.{Square, Board}
+  alias Board.Context
 
   @spec cast(t) :: {:ok, t}
   def cast(a), do: {:ok, a}
@@ -53,7 +54,7 @@ defmodule Chess.Games.Board do
 
   @spec moves_for(t, Square.t) :: [Square.t]
   def moves_for(board, sq) do
-    {_, _, moves} = Board.Context.moves_for({board, sq, []}, board |> at(sq))
+    {_, _, moves} = Context.moves_for({board, sq, []}, board |> at(sq))
 
     moves
   end
@@ -164,13 +165,14 @@ defmodule Chess.Games.Board.Context do
 
   @spec squares_to(Square.t, Square.t) :: [Square.t]
   defp squares_to(from, to) do
-    [{r1, c1}, {r2, c2}] = for s <- [from, to], do: s |> Square.to_indicies
+    [{r1, c1}, {r2, c2}] = for s <- [from, to],
+      do: s |> Square.to_indicies
 
     {rd, cd} = {r2 - r1, c2 - c1}
 
     if abs(rd) == abs(cd) or rd == 0 or cd == 0 do
       [ra, ca] = for a <- [rd, cd] do
-        case a  do
+        case a do
           0 -> 0
           a -> a / abs(a)
         end
@@ -178,7 +180,8 @@ defmodule Chess.Games.Board.Context do
 
       d = max(abs(rd), abs(cd))
 
-      for i <- 1..d, do: {ra * i + r1, ca * i + c1} |> Square.cast!
+      for i <- 1..d,
+        do: {ra * i + r1, ca * i + c1} |> Square.cast!
     else
       []
     end
@@ -296,7 +299,10 @@ defimpl Poison.Encoder, for: Chess.Games.Board do
   def encode(%Board{pieces: pieces}, _opts) do
     ps = for p <- pieces do
       case p do
-        {suit, piece} -> [suit |> Atom.to_string, piece |> Atom.to_string]
+        {suit, piece} -> [
+          suit |> Atom.to_string,
+          piece |> Atom.to_string,
+        ]
         :empty -> "empty"
       end
     end
@@ -304,4 +310,3 @@ defimpl Poison.Encoder, for: Chess.Games.Board do
     %{pieces: ps |> Enum.chunk(8)} |> Poison.encode!
   end
 end
-

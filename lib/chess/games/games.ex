@@ -117,7 +117,9 @@ defmodule Chess.Games do
     Board.moves_for game.board, sq
   end
 
-  @spec move(Game.t, Square.t, Square.T) :: {:ok, Game.t} | {:error, %Ecto.Changeset{}} | :error
+  @spec move(Game.t, Square.t, Square.T) :: {:ok, Game.t}
+                                          | {:error, %Ecto.Changeset{}}
+                                          | :error
   def move(%Game{} = game, from, to) do
     game = game |> Game.compute_board
     whos_turn = game |> Game.whos_turn
@@ -127,7 +129,8 @@ defmodule Chess.Games do
       {color, _} when color != whos_turn -> :error
       _ ->
         if to in Board.moves_for game.board, from do
-          actions = game.actions ++ [%{type: :move, from: from, to: to} |> Action.cast!]
+          actions =
+            game.actions ++ [%{type: :move, from: from, to: to} |> Action.cast!]
 
           update_game(game, %{actions: actions})
         else

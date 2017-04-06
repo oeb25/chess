@@ -66,7 +66,6 @@ export default class Game extends React.Component {
     const { game, moves, selected, flip } = this.state;
 
     const click = ([r, c]) => {
-      console.log('clicking');
       const [color, piece] = game.board.pieces[r][c];
 
       if (contains(moves, [r, c])) {
