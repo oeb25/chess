@@ -18,7 +18,7 @@ defmodule Chess.Games.Action do
   # Provide our own casting rules.
   @spec cast(t | %{type: String.t}) :: {:ok, t}
                                      | :error
-  def cast(%{type: t} = action) when is_binary(type),
+  def cast(%{type: t} = action) when is_binary(t),
     do: %{action | type: t |> String.to_atom}
   def cast(%Move{from: from, to: to}) do
     with {:ok, from} <- from |> Square.cast,
